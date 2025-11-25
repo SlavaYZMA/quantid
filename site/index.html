@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -11,17 +11,15 @@
   canvas{
     position:fixed;inset:0;z-index:1;
     transition:filter 1.8s ease;
-    filter:brightness(0.38) blur(4px); /* затемнён + размыт по умолчанию */
+    filter:brightness(0.38) blur(4px);
   }
-  canvas.clear{filter:none} /* чистый фон только после входа */
-
+  canvas.clear{filter:none}
   .intro{
     position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;
     color:#fff;text-align:center;padding:40px;
     opacity:0;visibility:hidden;transition:opacity 1.6s ease;
   }
   .intro.active{opacity:1;visibility:visible}
-
   .intro h1{font-size:38px;font-weight:600;letter-spacing:6px;margin-bottom:16px}
   .intro .year{font-size:18px;margin-bottom:40px;opacity:0.9}
   .intro p{font-size:17px;line-height:1.8;max-width:720px;margin:28px auto}
@@ -39,20 +37,17 @@
     background:#fff;transform:scaleX(0);transition:transform 0.4s ease;
   }
   .intro button:hover::after{transform:scaleX(1)}
-
   .back{
     position:fixed;top:24px;left:24px;z-index:20;color:#fff;font-size:15px;
     background:rgba(0,0,0,0.6);padding:8px 16px;cursor:pointer;display:none;
     border-bottom:1px solid #fff;padding-bottom:4px
   }
   .back.active{display:block}
-
   .speed{
     position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:20;
     color:#fff;font-size:17px;background:rgba(0,0,0,0.7);padding:8px 24px;display:none
   }
   .speed.active{display:block}
-
   .desc{
     position:fixed;bottom:24px;left:24px;right:24px;z-index:20;
     color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);
@@ -70,7 +65,7 @@
   <div>
     <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
     <div class="year">2025—2026</div>
-    <p>Если рассмотреть идентичность человека как многослойную систему. На физическом уровне идентичность является волновой функцией в квантовом пространстве: до внешнего воздействия существует в суперпозиции всех возможных состояний "я", а при наблюдении коллапсирует в одно. <br>
+    <p>Если рассмотреть идентичность человека как многослойную систему. На физическом уровне идентичность является волновой функцией в квантовом пространстве: до внешнего воздействия существует в суперпозиции всех возможных состояний "я", а при наблюдении коллапсирует в одно.<br>
     Проект рассматривает идентичность как совокупность этих слоев: возможных состояний, автобиографической истории, социальной маски, биологической формы и культурного нарратива. Это позволяет показать, что "я" не едино, а множественно.
 </p>
     <p>Проект создаёт твой автопортрет в реальном QCD-вакууме<br>на основе открытых данных Instagram Telegram Facebook X Threads.</p>
@@ -82,7 +77,7 @@
 <div class="intro" id="username">
   <div>
     <h1>ВВЕДИ СВОЙ username Instagram</h1>
-    <p>Только открыты профиль </p>
+    <p>Только открытый профиль</p>
     <input type="text" id="user" placeholder="@username" autocomplete="off">
     <button onclick="enter()">Запустить</button>
   </div>
@@ -94,7 +89,7 @@
 <div class="desc" id="desc">загрузка...</div>
 
 <script>
-// Квантовая симуляция
+// === КВАНТОВАЯ СИМУЛЯЦИЯ (остаётся без изменений) ===
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 canvas.width = innerWidth; canvas.height = innerHeight;
@@ -128,6 +123,7 @@ const roles = [
 ];
 
 for(let i=0;i<40;i++) createCluster();
+
 function createCluster(){
   const x0=Math.random()*size, y0=Math.random()*size, z0=Math.random()*size;
   const rho=5+Math.random()*9;
@@ -149,7 +145,7 @@ setInterval(()=>{
   if(Math.random() < 0.16 * speed) createCluster();
 
   const power=new Array(8).fill(0);
-  let Q=0, maxP=0, dom=-1, bright=0;
+  let Q=0, bright=0;
   for(let i=0;i<field.length;i++){
     const v=field[i]; Q+=v;
     const a=Math.abs(v);
@@ -161,8 +157,6 @@ setInterval(()=>{
   roles.forEach((r,i)=> r.p = (power[i]/sum*100).toFixed(1));
 
   let txt = bright<10 ? "чистый вакуум" :
-            maxP>42&&dom===3 ? `тревожная ${roles[3].p}% · пурпур` :
-            maxP>38&&dom===0 ? `творец ${roles[0].p}% · бирюза` :
             Q<-1.2 ? `Q ${Q.toFixed(2)} — тревога` :
             Q>1.4 ? `Q ${Q.toFixed(2)} — цельность` :
             `тревожная ${roles[3].p}% · творец ${roles[0].p}%`;
@@ -184,7 +178,7 @@ setInterval(()=>{
   }
 },16);
 
-// === Переходы ===
+// === ПЕРЕХОДЫ + ПАРСИНГ INSTAGRAM + СКАЧИВАНИЕ TXT ===
 function showUsername(){
   document.getElementById('welcome').classList.remove('active');
   document.getElementById('username').classList.add('active');
@@ -192,17 +186,58 @@ function showUsername(){
 }
 
 function enter(){
-  const u = document.getElementById('user').value.trim().replace(/^@/,'') || 'ты';
+  const u = document.getElementById('user').value.trim().replace(/^@/,'') || '';
+  if (!u) {
+    alert("Введи настоящий Instagram username");
+    return;
+  }
+
   document.title = `Квантовая идентичность · @${u}`;
   document.getElementById('username').classList.remove('active');
-  canvas.classList.add('clear'); // → фон становится полностью чётким и ярким
+  canvas.classList.add('clear');
   document.getElementById('back').classList.add('active');
   document.getElementById('speed').classList.add('active');
   document.getElementById('desc').classList.add('active');
+  document.getElementById('desc').textContent = `сканирую Instagram @${u}… 15–40 сек`;
+
+  fetch(`https://quantid-backend.onrender.com/parse?u=${u}`)
+    .then(r => r.json())
+    .then(res => {
+      if (res.status === "success") {
+        document.getElementById('desc').textContent = 
+          `@${u} · ${res.data.captions.length} постов · квантовый паспорт готов`;
+
+        // Убираем старую кнопку, если была
+        const oldBtn = document.getElementById('download-btn');
+        if (oldBtn) oldBtn.remove();
+
+        // Новая кнопка скачивания
+        const btn = document.createElement('div');
+        btn.id = 'download-btn';
+        btn.innerHTML = 'СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ (TXT)';
+        btn.style.cssText = `
+          position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
+          background:#fff; color:#000; padding:18px 36px; font-size:19px;
+          cursor:pointer; z-index:30; letter-spacing:2px; font-weight:600;
+          box-shadow:0 10px 40px rgba(0,0,0,0.6);
+        `;
+        btn.onclick = () => window.open(res.download_url, '_blank');
+        document.body.appendChild(btn);
+
+        // Здесь в будущем можно добавить персонализацию симуляции по словам из постов
+      } else {
+        document.getElementById('desc').textContent = "профиль приватный или Instagram временно недоступен";
+      }
+    })
+    .catch(err => {
+      document.getElementById('desc').textContent = "сервер просыпается (Render Free) — подожди 15–20 сек и нажми ещё раз";
+    });
 }
 
 document.getElementById('back').onclick = () => location.reload();
-document.getElementById('user')?.addEventListener('keypress', e=>{if(e.key==='Enter') enter()});
+document.getElementById('user')?.addEventListener('keypress', e=>{
+  if(e.key==='Enter') enter();
+});
 </script>
 </body>
 </html>
