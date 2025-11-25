@@ -30,20 +30,20 @@
   .download-btn{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none}
   .download-btn.active{display:block}
 
-  /* ← НОВЫЙ ТЕРМИНАЛ → */
   .terminal{
-    position:fixed;bottom:24px;right:24px;z-index:25;width:420px;max-height:60vh;
-    background:#000;border:1px solid #fff;padding:12px;font-size:13px;line-height:1.6;
-    color:#0f0;overflow-y:auto;display:none;opacity:0;transition:all 0.6s ease;
-    box-shadow:0 0 30px rgba(0,255,0,0.3);
+    position:fixed;bottom:24px;right:24px;z-index:25;width:480px;max-height:70vh;
+    background:#000;border:1px solid #0f8;padding:16px;font-size:13px;line-height:1.8;
+    color:#0f8;overflow-y:auto;display:none;opacity:0;transition:all 0.6s ease;
+    box-shadow:0 0 40px rgba(0,255,136,0.25);backdrop-filter:blur(4px);
   }
   .terminal.active{display:block;opacity:1;}
   .terminal-toggle{
-    position:fixed;bottom:24px;right:24px;z-index:26;background:rgba(0,255,0,0.15);
-    color:#0f8;padding:8px 14px;font-size:12px;cursor:pointer;border:1px solid #0f8;
-    display:none;
+    position:fixed;bottom:24px;right:24px;z-index:26;background:rgba(0,255,136,0.15);
+    color:#0f8;padding:10px 18px;font-size:13px;cursor:pointer;border:1px solid #0f8;
+    display:none;transition:all 0.4s;
   }
   .terminal-toggle.active{display:block;}
+  .terminal-toggle:hover{background:rgba(0,255,136,0.3);}
 </style>
 </head>
 <body>
@@ -55,7 +55,7 @@
   <div>
     <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
     <div class="year">2025—2026 · Влада Садик</div>
-    <p>Идентичность — это не «я есть», это суперпозиция всех возможных «я».<br>Проект коллапсирует её в живую QCD-пену из твоих данных.</p>
+    <p>Ты — суперпозиция. Этот проект коллапсирует тебя в живую QCD-пену из твоих слов.</p>
     <button onclick="showUsername()">НАЧАТЬ</button>
   </div>
 </div>
@@ -74,7 +74,6 @@
 <div class="desc" id="desc">загрузка...</div>
 <div class="download-btn" id="downloadBtn">СКАЧАТЬ ОНТОЛОГИЮ (TXT)</div>
 
-<!-- ТЕРМИНАЛ -->
 <div class="terminal-toggle" id="terminalToggle">ТЕРМИНАЛ ▶</div>
 <div class="terminal" id="terminal"></div>
 
@@ -103,15 +102,20 @@ let clusters = [
 ];
 
 let prevEnergy = clusters.map(()=>0);
+let lastLogTime = 0;
 const log = [];
 
 function logEvent(msg){
+  if(t - lastLogTime < 9) return; // минимум 9 секунд между событиями
+  lastLogTime = t;
   const line = `[t=${t.toFixed(1)}] ${msg}`;
   log.push(line);
-  if(log.length > 200) log.shift();
+  if(log.length > 120) log.shift();
   const term = document.getElementById('terminal');
-  if(term) term.innerHTML = log.join('<br>') + '<br>';
-  term.scrollTop = term.scrollHeight;
+  if(term){
+    term.innerHTML = log.join('<br>') + '<br>';
+    term.scrollTop = term.scrollHeight;
+  }
 }
 
 document.addEventListener('wheel', e=>{
@@ -144,7 +148,9 @@ function createCluster(){
       added = true;
     }
   }
-  if(added && Math.random()<0.15) logEvent(`"${chosen.name}" рождает инстантон`);
+  if(added && Math.random()<0.07){
+    logEvent(`"${chosen.name}" рождает инстантон → вес ${chosen.weight} постов, когерентность ${chosen.coherence.toFixed(2)} → стабильность волны`);
+  }
 }
 
 for(let i=0;i<50;i++) createCluster();
@@ -163,7 +169,7 @@ setInterval(()=>{
       let best = 0, bestScore = 0;
       for(let c=0; c<clusters.length; c++){
         const expected = Math.cos(t * clusters[c].freq * speed + clusters[c].phase);
-        const score = a * (v > 0 === expected > 0 ? 1 : 0.1);
+        const score = a * ((v > 0) === (expected > 0) ? 1 : 0.1);
         if(score > bestScore){ bestScore = score; best = c; }
       }
       energy[best] += a;
@@ -172,14 +178,30 @@ setInterval(()=>{
   const sumE = energy.reduce((a,b)=>a+b, 0.0001);
   const perc = energy.map(e=>e/sumE*100);
 
-  // ← ЛОГИКА СОБЫТИЙ →
+  // УМНЫЕ, РЕДКИЕ И ГЛУБОКИЕ СОБЫТИЯ
   for(let i=0;i<clusters.length;i++){
     const delta = perc[i] - prevEnergy[i];
-    if(delta > 8) logEvent(`"${clusters[i].name}" доминирует ↑ ${perc[i].toFixed(1)}%`);
-    if(delta < -8) logEvent(`"${clusters[i].name}" подавляется ↓ ${perc[i].toFixed(1)}%`);
-    if(perc[i] > 40) logEvent(`"${clusters[i].name}" захватывает вакуум`);
+    if(Math.abs(delta) > 12){
+      const dir = delta > 0 ? "доминирует ↑" : "подавляется ↓";
+      const reason = delta > 0 
+        ? `сильный вес кластера и высокая внутренняя когерентность ${clusters[i].coherence.toFixed(2)} → устойчивые волны`
+        : `фазовый конфликт с доминирующим кластером → деструктивная интерференция`;
+      logEvent(`"${clusters[i].name}" ${dir} ${perc[i].toFixed(1)}% → ${reason}`);
+    }
+    if(perc[i] > 48){
+      logEvent(`"${clusters[i].name}" захватывает вакуум → полное доминирование поля, остальные версии подавлены`);
+    }
   }
-  prevEnergy = perc;
+
+  if(Math.random() < 0.004){
+    const a = Math.floor(Math.random()*clusters.length);
+    const b = Math.floor(Math.random()*clusters.length);
+    if(a !== b && Math.abs(clusters[a].phase - clusters[b].phase) < 0.4){
+      logEvent(`"${clusters[a].name}" и "${clusters[b].name}" синхронизировались → редкая конструктивная интерференция → вспышка амплитуды`);
+    }
+  }
+
+  prevEnergy = [...perc];
 
   document.getElementById('desc').textContent = 
     clusters.map((c,i)=>`${c.name} ${perc[i].toFixed(1)}%`).slice(0,6).join(" · ");
@@ -284,7 +306,6 @@ async function enter(){
     clusters = newClusters.length ? newClusters : clusters;
   }catch(e){}
 
-  // TXT и финал
   let txt = `КВАНТОВАЯ ОНТОЛОГИЯ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\n`;
   clusters.forEach((c,i)=>txt+=`${i+1}. ${c.name.toUpperCase()}\n`);
   txt += `\n\nПосты:\n` + sentences.map((s,i)=>`${i+1}. ${s}`).join('\n');
@@ -315,7 +336,6 @@ function finishWithFallback(u){
   document.getElementById('desc').textContent = `@${u} · базовый портрет`;
 }
 
-// ТЕРМИНАЛ
 document.getElementById('terminalToggle').onclick = () => {
   const term = document.getElementById('terminal');
   const tog = document.getElementById('terminalToggle');
