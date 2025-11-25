@@ -5,282 +5,226 @@
 <title>Квантовая идентичность</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-
-<!-- НЕОБХОДИМЫЕ БИБЛИОТЕКИ -->
-<script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2"></script>
-<script src="https://cdn.jsdelivr.net/npm/ml-kmeans@6.0.0/dist/kmeans.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/seedrandom@3.0.5"></script>
-<script>Math.seedrandom = seedrandom;</script>
-
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body,html{height:100%;overflow:hidden;background:#000;font-family:'IBM Plex Mono',monospace}
-  canvas{position:fixed;inset:0;z-index:1;transition:filter 1.8s ease;filter:brightness(0.38) blur(4px)}
-  canvas.clear{filter:none}
-  .intro{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:40px;opacity:0;visibility:hidden;transition:opacity 1.6s ease}
-  .intro.active{opacity:1;visibility:visible}
-  .intro h1{font-size:38px;font-weight:600;letter-spacing:6px;margin-bottom:16px}
-  .intro .year{font-size:18px;margin-bottom:40px;opacity:0.9}
-  .intro p{font-size:17px;line-height:1.8;max-width:720px;margin:28px auto}
-  .intro input{background:transparent;border:none;border-bottom:1px solid #fff;color:#fff;font-size:19px;padding:12px 0;width:320px;max-width:90%;text-align:center;outline:none;margin:30px 0 40px}
-  .intro button{background:none;border:none;color:#fff;font-size:18px;letter-spacing:3px;cursor:pointer;padding:10px 0;position:relative}
-  .intro button::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:#fff;transform:scaleX(0);transition:transform 0.4s ease}
-  .intro button:hover::after{transform:scaleX(1)}
-  .back{position:fixed;top:24px;left:24px;z-index:20;color:#fff;font-size:15px;background:rgba(0,0,0,0.6);padding:8px 16px;cursor:pointer;display:none;border-bottom:1px solid #fff}
-  .back.active{display:block}
-  .speed{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:20;color:#fff;font-size:17px;background:rgba(0,0,0,0.7);padding:8px 24px;display:none}
-  .speed.active{display:block}
-  .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none}
-  .desc.active{display:block}
-  .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none;line-height:1.6;text-align:center}
-  .download-btn{
-    position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
-    background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;
-    cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;
-    box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none;
-  }
-  .download-btn.active{display:block}
+&nbsp;&nbsp;*{box-sizing:border-box;margin:0;padding:0}
+&nbsp;&nbsp;body,html{height:100%;overflow:hidden;background:#000;font-family:'IBM Plex Mono',monospace}
+&nbsp;&nbsp;canvas{position:fixed;inset:0;z-index:1;transition:filter 1.8s ease;filter:brightness(0.38) blur(4px)}
+&nbsp;&nbsp;canvas.clear{filter:none}
+&nbsp;&nbsp;.intro{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:40px;opacity:0;visibility:hidden;transition:opacity 1.6s ease}
+&nbsp;&nbsp;.intro.active{opacity:1;visibility:visible}
+&nbsp;&nbsp;.intro h1{font-size:38px;font-weight:600;letter-spacing:6px;margin-bottom:16px}
+&nbsp;&nbsp;.intro .year{font-size:18px;margin-bottom:40px;opacity:0.9}
+&nbsp;&nbsp;.intro p{font-size:17px;line-height:1.8;max-width:720px;margin:28px auto}
+&nbsp;&nbsp;.intro input{background:transparent;border:none;border-bottom:1px solid #fff;color:#fff;font-size:19px;padding:12px 0;width:320px;max-width:90%;text-align:center;outline:none;margin:30px 0 40px}
+&nbsp;&nbsp;.intro button{background:none;border:none;color:#fff;font-size:18px;letter-spacing:3px;cursor:pointer;padding:10px 0;position:relative}
+&nbsp;&nbsp;.intro button::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:#fff;transform:scaleX(0);transition:transform 0.4s ease}
+&nbsp;&nbsp;.intro button:hover::after{transform:scaleX(1)}
+&nbsp;&nbsp;.back{position:fixed;top:24px;left:24px;z-index:20;color:#fff;font-size:15px;background:rgba(0,0,0,0.6);padding:8px 16px;cursor:pointer;display:none;border-bottom:1px solid #fff}
+&nbsp;&nbsp;.back.active{display:block}
+&nbsp;&nbsp;.speed{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:20;color:#fff;font-size:17px;background:rgba(0,0,0,0.7);padding:8px 24px;display:none}
+&nbsp;&nbsp;.speed.active{display:block}
+&nbsp;&nbsp;.desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none}
+&nbsp;&nbsp;.desc.active{display:block}
+&nbsp;&nbsp;.loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none}
+&nbsp;&nbsp;.download-btn{
+&nbsp;&nbsp;&nbsp;&nbsp;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+&nbsp;&nbsp;&nbsp;&nbsp;background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;
+&nbsp;&nbsp;&nbsp;&nbsp;cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;
+&nbsp;&nbsp;&nbsp;&nbsp;box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none;
+&nbsp;&nbsp;}
+&nbsp;&nbsp;.download-btn.active{display:block}
 </style>
 </head>
 <body>
-
 <canvas id="c"></canvas>
-<div class="loading" id="loading">ИИ входит в тебя...<br>5–15 секунд</div>
-
+<div class="loading" id="loading">Читаю Instagram @<span id="loaduser"></span>…</div>
 <div class="intro active" id="welcome">
-  <div>
-    <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
-    <div class="year">2025—2026 · Влада Садик</div>
-    <p>Если рассмотреть идентичность человека как многослойную систему. На физическом уровне идентичность является волновой функцией в квантовом пространстве: до внешнего воздействия существует в суперпозиции всех возможных состояний "я", а при наблюдении коллапсирует в одно.<br><br>
-    Проект создаёт твой автопортрет в реальном QCD-вакууме<br>на основе открытых данных Instagram.</p>
-    <button onclick="showUsername()">НАЧАТЬ</button>
-  </div>
+&nbsp;&nbsp;<div>
+&nbsp;&nbsp;&nbsp;&nbsp;<h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
+&nbsp;&nbsp;&nbsp;&nbsp;<div class="year">2025—2026 · Влада Садик</div>
+&nbsp;&nbsp;&nbsp;&nbsp;<p>Если рассмотреть идентичность человека как многослойную систему. На физическом уровне идентичность является волновой функцией в квантовом пространстве: до внешнего воздействия существует в суперпозиции всех возможных состояний "я", а при наблюдении коллапсирует в одно. 
+<br>Проект рассматривает идентичность как совокупность этих слоев: возможных состояний, автобиографической истории, социальной маски, биологической формы и культурного нарратива. Это позволяет показать, что "я" не едино, а множественно.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;<p>Проект создаёт твой автопортрет в реальном QCD-вакууме<br>на основе открытых данных Instagram.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="showUsername()">НАЧАТЬ</button>
+&nbsp;&nbsp;</div>
 </div>
-
 <div class="intro" id="username">
-  <div>
-    <h1>ВВЕДИ СВОЙ INSTAGRAM</h1>
-    <p>Только публичный профиль · ничего не сохраняется</p>
-    <input type="text" id="user" placeholder="@username" autocomplete="off">
-    <button onclick="enter()">ЗАПУСТИТЬ СИМУЛЯЦИЮ</button>
-  </div>
+&nbsp;&nbsp;<div>
+&nbsp;&nbsp;&nbsp;&nbsp;<h1>ВВЕДИ СВОЙ INSTAGRAM</h1>
+&nbsp;&nbsp;&nbsp;&nbsp;<p>Только публичный профиль · ничего не сохраняется</p>
+&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="user" placeholder="@username" autocomplete="off">
+&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="enter()">ЗАПУСТИТЬ СИМУЛЯЦИЮ</button>
+&nbsp;&nbsp;</div>
 </div>
-
 <div class="back" id="back">← назад</div>
 <div class="speed" id="speed">скор ×1.00</div>
-<div class="desc" id="desc">случайный вакуум</div>
-<div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ (TXT)</div>
-
+<div class="desc" id="desc">загрузка...</div>
+<div class="download-btn" id="downloadBtn">СКАЧАТЬ ДАННЫЕ (TXT)</div>
 <script>
+// ТВОЙ ТОКЕН + НАДЁЖНЫЙ АКТОР (работает в 2025)
 const APIFY_TOKEN = "apify_api_XFk4W4rmvDDfnSxhsYzkUbHnHPdJ0R1I2wyz";
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 canvas.width = innerWidth; canvas.height = innerHeight;
-window.onresize = () => { canvas.width = innerWidth; canvas.height = innerHeight; };
+window.onresize = ()=>{canvas.width=innerWidth; canvas.height=innerHeight};
 
 const size = 96;
 const field = new Float32Array(size*size*size);
 let t = 0;
 let speed = 1.0;
+let roleWeights = [0.30,0.23,0.16,0.40,0.19,0.14,0.22,0.27];
 
-// СЛУЧАЙНЫЕ КЛАСТЕРЫ НА СТАРТЕ — красиво с первой секунды
-let clusters = [
-  {name: "ночной", weight: 1},
-  {name: "свет", weight: 0.9},
-  {name: "тень", weight: 1.1},
-  {name: "пульс", weight: 0.8},
-  {name: "эхо", weight: 1.2},
-  {name: "шёпот", weight: 0.7},
-  {name: "вспышка", weight: 1},
-  {name: "пустота", weight: 0.9}
-];
-
-document.addEventListener('wheel', e => {
-  speed = e.deltaY < 0 ? Math.min(speed*1.4, 100) : Math.max(speed/1.4, 0.01);
-  document.getElementById('speed').textContent = `скор ×${speed.toFixed(2)}`;
+document.addEventListener('wheel', e=>{
+&nbsp;&nbsp;speed = e.deltaY<0 ? Math.min(speed*1.4,100) : Math.max(speed/1.4,0.01);
+&nbsp;&nbsp;document.getElementById('speed').textContent = `скор ×${speed.toFixed(2)}`;
 });
-document.addEventListener('keydown', e => {
-  if (e.key === "ArrowRight") speed = Math.min(speed*2, 100);
-  if (e.key === "ArrowLeft") speed = Math.max(speed/2, 0.01);
-  document.getElementById('speed').textContent = `скор ×${speed.toFixed(2)}`;
+document.addEventListener('keydown', e=>{
+&nbsp;&nbsp;if(e.key==="ArrowRight") speed = Math.min(speed*2,100);
+&nbsp;&nbsp;if(e.key==="ArrowLeft") speed = Math.max(speed/2,0.01);
+&nbsp;&nbsp;document.getElementById('speed').textContent = `скор ×${speed.toFixed(2)}`;
 });
 
-function createCluster() {
-  if (clusters.length === 0) return;
-  const x0 = Math.random() * size, y0 = Math.random() * size, z0 = Math.random() * size;
-  const rho = 5 + Math.random() * 9;
-  const r = weightedRandom(clusters.map(c => c.weight));
-  const s = clusters[r].weight * (1.6 + Math.random() * 0.8);
-  const phase = Math.random() * Math.PI * 2;
-
-  for (let dx = -rho*2|0; dx < rho*2; dx++)
-  for (let dy = -rho*2|0; dy < rho*2; dy++)
-  for (let dz = -rho*2|0; dz < rho*2; dz++) {
-    const x = Math.floor(x0+dx), y = Math.floor(y0+dy), z = Math.floor(z0+dz);
-    if (x<0||x>=size||y<0||y>=size||z<0||z>=size) continue;
-    const d = Math.hypot(dx, dy, dz);
-    if (d < rho*1.8)
-      field[z*size*size + y*size + x] += s * Math.exp(-d*d/(rho*rho)) * Math.cos(t*0.03 + phase);
-  }
+for(let i=0;i<40;i++) createCluster();
+function createCluster(){
+&nbsp;&nbsp;const x0=Math.random()*size, y0=Math.random()*size, z0=Math.random()*size;
+&nbsp;&nbsp;const rho=5+Math.random()*9;
+&nbsp;&nbsp;const r=Math.floor(Math.pow(Math.random(),0.75)*8);
+&nbsp;&nbsp;const s=roleWeights[r]*(1.6+Math.random()*0.8);
+&nbsp;&nbsp;const phase=r===3?Math.PI:Math.random()*1.5;
+&nbsp;&nbsp;for(let dx=-rho*2|0;dx<rho*2;dx++)for(let dy=-rho*2|0;dy<rho*2;dy++)for(let dz=-rho*2|0;dz<rho*2;dz++){
+&nbsp;&nbsp;&nbsp;&nbsp;const x=Math.floor(x0+dx),y=Math.floor(y0+dy),z=Math.floor(z0+dz);
+&nbsp;&nbsp;&nbsp;&nbsp;if(x<0||x>=size||y<0||y>=size||z<0||z>=size) continue;
+&nbsp;&nbsp;&nbsp;&nbsp;const d=Math.hypot(dx,dy,dz);
+&nbsp;&nbsp;&nbsp;&nbsp;if(d<rho*1.8) field[z*size*size+y*size+x] += s*Math.exp(-d*d/(rho*rho))*Math.cos(t*0.03+phase);
+&nbsp;&nbsp;}
 }
 
-function weightedRandom(weights) {
-  const sum = weights.reduce((a,b) => a+b, 0);
-  let r = Math.random() * sum;
-  for (let i = 0; i < weights.length; i++) {
-    r -= weights[i];
-    if (r <= 0) return i;
-  }
-  return weights.length - 1;
+setInterval(()=>{
+&nbsp;&nbsp;t += 0.018 * speed;
+&nbsp;&nbsp;const decay = Math.pow(0.996, speed);
+&nbsp;&nbsp;for(let i=0;i<field.length;i++) field[i] *= decay;
+&nbsp;&nbsp;if(Math.random() < 0.16 * speed) createCluster();
+
+&nbsp;&nbsp;const power=new Array(8).fill(0);
+&nbsp;&nbsp;let Q=0, bright=0;
+&nbsp;&nbsp;for(let i=0;i<field.length;i++){
+&nbsp;&nbsp;&nbsp;&nbsp;const v=field[i]; Q+=v;
+&nbsp;&nbsp;&nbsp;&nbsp;const a=Math.abs(v);
+&nbsp;&nbsp;&nbsp;&nbsp;if(a>0.45) bright++;
+&nbsp;&nbsp;&nbsp;&nbsp;if(a>0.38) power[3]+=a*1.4;
+&nbsp;&nbsp;&nbsp;&nbsp;power[Math.floor(Math.random()*8)] += a*0.15;
+&nbsp;&nbsp;}
+&nbsp;&nbsp;const sum=power.reduce((a,b)=>a+b)||1;
+&nbsp;&nbsp;const perc = power.map(p=>p/sum*100);
+
+&nbsp;&nbsp;let txt = bright<10 ? "чистый вакуум" :
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;perc[3]>42 ? `тревожная ${perc[3].toFixed(1)}%` :
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;perc[0]>38 ? `творец ${perc[0].toFixed(1)}%` :
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Q<-1.2 ? `Q ${Q.toFixed(2)} — тревога` :
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Q>1.4 ? `Q ${Q.toFixed(2)} — цельность` :
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`тревожная ${perc[3].toFixed(1)}% · творец ${perc[0].toFixed(1)}%`;
+&nbsp;&nbsp;document.getElementById('desc').textContent = txt;
+
+&nbsp;&nbsp;ctx.fillStyle='#000008';
+&nbsp;&nbsp;ctx.fillRect(0,0,canvas.width,canvas.height);
+&nbsp;&nbsp;const sx=canvas.width/size, sy=canvas.height/size;
+&nbsp;&nbsp;for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+&nbsp;&nbsp;&nbsp;&nbsp;let sum=0;
+&nbsp;&nbsp;&nbsp;&nbsp;for(let z=0;z<size;z++) sum+=field[z*size*size+y*size+x];
+&nbsp;&nbsp;&nbsp;&nbsp;const q=sum/size;
+&nbsp;&nbsp;&nbsp;&nbsp;if(Math.abs(q)>0.011){
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const hue=q>0?188:298;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const i=Math.min(Math.abs(q)*11,1);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctx.fillStyle=`hsla(${hue},100%,${58+i*37}%,${i})`;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctx.fillRect(x*sx,y*sy,sx+1,sy+1);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;}
+},16);
+
+function showUsername(){
+&nbsp;&nbsp;document.getElementById('welcome').classList.remove('active');
+&nbsp;&nbsp;document.getElementById('username').classList.add('active');
+&nbsp;&nbsp;setTimeout(()=>document.getElementById('user').focus(),300);
 }
 
-// Запуск случайной пены сразу
-for (let i = 0; i < 60; i++) createCluster();
+async function enter(){
+&nbsp;&nbsp;const raw = document.getElementById('user').value.trim().replace(/^@/,'');
+&nbsp;&nbsp;if(!raw){ alert("Введи username"); return; }
+&nbsp;&nbsp;
+&nbsp;&nbsp;document.getElementById('loaduser').textContent = raw;
+&nbsp;&nbsp;document.getElementById('loading').style.display = 'block';
+&nbsp;&nbsp;document.getElementById('downloadBtn').classList.remove('active');
 
-setInterval(() => {
-  t += 0.018 * speed;
-  const decay = Math.pow(0.996, speed);
-  for (let i = 0; i < field.length; i++) field[i] *= decay;
-  if (Math.random() < 0.16 * speed) createCluster();
+&nbsp;&nbsp;let profileData = null;
+&nbsp;&nbsp;let fullText = "";
 
-  let bright = 0;
-  for (let i = 0; i < field.length; i++) if (Math.abs(field[i]) > 0.45) bright++;
+&nbsp;&nbsp;try {
+&nbsp;&nbsp;&nbsp;&nbsp;const res = await fetch("https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token="+APIFY_TOKEN, {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;method: "POST",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;headers: {"Content-Type":"application/json"},
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;body: JSON.stringify({ usernames: [raw], resultsLimit: 20 })
+&nbsp;&nbsp;&nbsp;&nbsp;});
+&nbsp;&nbsp;&nbsp;&nbsp;const data = await res.json();
 
-  const txt = clusters.length <= 8
-    ? "случайный вакуум"
-    : bright < 10
-      ? "чистый вакуум"
-      : `${clusters.length} версий себя: ${clusters.map(c => c.name).slice(0,5).join(" · ")}${clusters.length > 5 ? "…" : ""}`;
+&nbsp;&nbsp;&nbsp;&nbsp;if (Array.isArray(data) && data[0]) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;profileData = data[0];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const posts = profileData.latestPosts || [];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fullText = ((profileData.biography || "") + " " + posts.map(p => p.caption || "").join(" ")).toLowerCase();
 
-  document.getElementById('desc').textContent = txt;
-  document.getElementById('desc').classList.add('active');
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Персонализация ролей
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const keywords = [
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;["арт","творчеств","худож","картин","выставк","куратор"],
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;["мама","дети","ребён","сын","доч"],
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;["доч","папа","мама","родител"],
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;["тревог","страх","паник","нерв","боюс","депрес"],
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;["куратор","биеннал","галере","арт-пространств"],
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;["тело","йога","спорт","боль","здоровь"],
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;["постчеловек","киборг","ai","нейросет","трансгуман"],
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;["наблюда","квантов","сознани","медитац","духовн"]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;keywords.forEach((words,i) => {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (words.some(w => fullText.includes(w))) roleWeights[i] *= 3.5;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;} catch(e) {
+&nbsp;&nbsp;&nbsp;&nbsp;console.log("Instagram временно недоступен");
+&nbsp;&nbsp;}
 
-  ctx.fillStyle = '#000008';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  const sx = canvas.width / size, sy = canvas.height / size;
-  for (let y = 0; y < size; y++)
-  for (let x = 0; x < size; x++) {
-    let sum = 0;
-    for (let z = 0; z < size; z++) sum += field[z*size*size + y*size + x];
-    const q = sum / size;
-    if (Math.abs(q) > 0.011) {
-      const hue = q > 0 ? 188 : 298;
-      const i = Math.min(Math.abs(q) * 11, 1);
-      ctx.fillStyle = `hsla(${hue},100%,${58 + i*37}%,${i})`;
-      ctx.fillRect(x*sx, y*sy, sx+1, sy+1);
-    }
-  }
-}, 16);
+&nbsp;&nbsp;// === TXT ПАСПОРТ ===
+&nbsp;&nbsp;let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\nДата: ${new Date().toLocaleString('ru-RU')}\n\n`;
+&nbsp;&nbsp;if (profileData) {
+&nbsp;&nbsp;&nbsp;&nbsp;txt += `Имя: ${profileData.fullName || "—"}\nБио: ${profileData.biography || "—"}\nПостов: ${(profileData.latestPosts || []).length}\n\n`;
+&nbsp;&nbsp;&nbsp;&nbsp;(profileData.latestPosts || []).forEach((p,i) => {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txt += `Пост ${i+1}\n${p.caption || "(без текста)"}\nЛайков: ${p.likesCount || 0}   Комментов: ${p.commentsCount || 0}\n\n`;
+&nbsp;&nbsp;&nbsp;&nbsp;});
+&nbsp;&nbsp;} else {
+&nbsp;&nbsp;&nbsp;&nbsp;txt += "Профиль приватный или Instagram временно недоступен\nПортрет создан на базовых ролях\n";
+&nbsp;&nbsp;}
 
-// === ОНТОЛОГИЯ ===
-let embedder = null;
-async function initEmbedder() {
-  if (embedder) return embedder;
-  document.getElementById('loading').style.display = 'block';
-  document.getElementById('loading').innerHTML = "ИИ входит в тебя...<br>5–15 секунд";
-  embedder = await Xenova.pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-  return embedder;
-}
+&nbsp;&nbsp;const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
+&nbsp;&nbsp;const url = URL.createObjectURL(blob);
+&nbsp;&nbsp;const btn = document.getElementById('downloadBtn');
+&nbsp;&nbsp;btn.onclick = () => {
+&nbsp;&nbsp;&nbsp;&nbsp;const a = document.createElement('a');
+&nbsp;&nbsp;&nbsp;&nbsp;a.href = url;
+&nbsp;&nbsp;&nbsp;&nbsp;a.download = `quantum-passport_${raw}_${new Date().toISOString().slice(0,10)}.txt`;
+&nbsp;&nbsp;&nbsp;&nbsp;a.click();
+&nbsp;&nbsp;};
+&nbsp;&nbsp;btn.classList.add('active');
 
-async function enter() {
-  const raw = document.getElementById('user').value.trim().replace(/^@/,'');
-  if (!raw) return alert("Введи username");
-
-  document.getElementById('loaduser').textContent = raw;
-  document.getElementById('loading').style.display = 'block';
-  document.getElementById('downloadBtn').classList.remove('active');
-
-  let texts = [];
-  let profileData = null;
-
-  try {
-    const res = await fetch("https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token="+APIFY_TOKEN, {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ usernames: [raw], resultsLimit: 30 })
-    });
-    const data = await res.json();
-    if (Array.isArray(data) && data[0]) {
-      profileData = data[0];
-      const posts = profileData.latestPosts || [];
-      texts = posts
-        .filter(p => p && p.caption)
-        .map(p => p.caption.trim())
-        .filter(t => t.length > 10);
-      if (profileData.biography) texts.unshift(profileData.biography.trim());
-    }
-  } catch(e) { console.log(e); }
-
-  if (texts.length === 0) {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('desc').textContent = "профиль приватный или пустой · случайный вакуум";
-    return;
-  }
-
-  await initEmbedder();
-  document.getElementById('loading').innerHTML = "ИИ читает твою душу...";
-
-  const embeddings = await Promise.all(texts.map(t => embedder(t, { pooling: 'mean', normalize: true })));
-  const vectors = embeddings.map(e => Array.from(e.data));
-
-  const maxK = Math.min(15, Math.max(5, Math.floor(texts.length / 3)));
-  let bestK = 5, bestScore = -Infinity;
-  for (let k = 5; k <= maxK; k++) {
-    const km = kmeans(vectors, k, { seed: Math.seedrandom(raw) });
-    const score = km.silhouetteScore(vectors);
-    if (score > bestScore) { bestScore = score; bestK = k; }
-  }
-  const km = kmeans(vectors, k, { seed: Math.seedrandom(raw) });
-  const labels = km.clusters;
-
-  clusters = [];
-  for (let i = 0; i < bestK; i++) {
-    const idxs = labels.map((l, j) => l === i ? j : -1).filter(x => x !== -1);
-    const clusterTexts = idxs.map(j => texts[j]);
-    const words = clusterTexts.join(" ").toLowerCase().match(/[а-яё]+/g) || [];
-    const freq = {};
-    words.forEach(w => freq[w] = (freq[w]||0) + 1);
-    const top = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0,6).map(x=>x[0]);
-    const name = top.slice(0,3).join(" ") || `версия ${i+1}`;
-    const weight = idxs.length / texts.length;
-    clusters.push({ name, weight: weight * 12 });
-  }
-
-  // TXT паспорт
-  let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\n`;
-  txt += `Найдено версий себя: ${clusters.length}\n\n`;
-  clusters.forEach((c,i) => txt += `${i+1}. ${c.name} (${(c.weight*8.33).toFixed(1)}%)\n`);
-  txt += "\n\nПосты:\n" + texts.map((t,i) => `${i+1}. ${t}`).join("\n\n");
-
-  const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
-  const url = URL.createObjectURL(blob);
-  const btn = document.getElementById('downloadBtn');
-  btn.onclick = () => {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `quantum-ontology_${raw}_${new Date().toISOString().slice(0,10)}.txt`;
-    a.click();
-  };
-  btn.classList.add('active');
-
-  document.title = `Квантовая идентичность · @${raw}`;
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('username').classList.remove('active');
-  canvas.classList.add('clear');
-  document.getElementById('back').classList.add('active');
-  document.getElementById('speed').classList.add('active');
-}
-
-function showUsername() {
-  document.getElementById('welcome').classList.remove('active');
-  document.getElementById('username').classList.add('active');
-  setTimeout(() => document.getElementById('user').focus(), 300);
+&nbsp;&nbsp;document.title = `Квантовая идентичность · @${raw}`;
+&nbsp;&nbsp;document.getElementById('loading').style.display = 'none';
+&nbsp;&nbsp;document.getElementById('username').classList.remove('active');
+&nbsp;&nbsp;canvas.classList.add('clear');
+&nbsp;&nbsp;document.getElementById('back').classList.add('active');
+&nbsp;&nbsp;document.getElementById('speed').classList.add('active');
+&nbsp;&nbsp;document.getElementById('desc').classList.add('active');
+&nbsp;&nbsp;document.getElementById('desc').textContent = profileData ? `@${raw} · квантовый портрет готов` : `@${raw} · базовый портрет`;
 }
 
 document.getElementById('back').onclick = () => location.reload();
-document.getElementById('user')?.addEventListener('keypress', e => { if(e.key==='Enter') enter(); });
+document.getElementById('user')?.addEventListener('keypress', e=>{if(e.key==='Enter') enter()});
 </script>
 </body>
 </html>
-
