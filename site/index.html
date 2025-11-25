@@ -2,9 +2,11 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>Квантовая идентичность</title>
+<title>Квантовая идентичность · Влада Садик</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/ml-kmeans@6.0.0/dist/index.min.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body,html{height:100%;overflow:hidden;background:#000;font-family:'IBM Plex Mono',monospace}
@@ -63,10 +65,10 @@
 <div class="back" id="back">← назад</div>
 <div class="speed" id="speed">скор ×1.00</div>
 <div class="desc" id="desc">загрузка...</div>
-<div class="download-btn" id="downloadBtn">СКАЧАТЬ ДАННЫЕ (TXT)</div>
+<div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВУЮ ОНТОЛОГИЮ (TXT)</div>
 
 <script>
-// ТВОЙ ТОКЕН + НАДЁЖНЫЙ АКТОР (работает в 2025)
+// ТВОЙ ТОКЕН
 const APIFY_TOKEN = "apify_api_XFk4W4rmvDDfnSxhsYzkUbHnHPdJ0R1I2wyz";
 
 const canvas = document.getElementById('c');
@@ -79,6 +81,7 @@ const field = new Float32Array(size*size*size);
 let t = 0;
 let speed = 1.0;
 let roleWeights = [0.30,0.23,0.16,0.40,0.19,0.14,0.22,0.27];
+let clusterNames = ["творец","мама","дочь","тревожная","куратор","тело","постчеловек","наблюдатель"];
 
 document.addEventListener('wheel', e=>{
   speed = e.deltaY<0 ? Math.min(speed*1.4,100) : Math.max(speed/1.4,0.01);
@@ -94,9 +97,17 @@ for(let i=0;i<40;i++) createCluster();
 function createCluster(){
   const x0=Math.random()*size, y0=Math.random()*size, z0=Math.random()*size;
   const rho=5+Math.random()*9;
-  const r=Math.floor(Math.pow(Math.random(),0.75)*8);
+  const totalWeight = roleWeights.reduce((a,b)=>a+b,0);
+  let rand = Math.random() * totalWeight;
+  let r = 0;
+  for(; r<roleWeights.length; r++){
+    rand -= roleWeights[r];
+    if(rand <= 0) break;
+  }
+  if(r >= roleWeights.length) r = roleWeights.length-1;
+  
   const s=roleWeights[r]*(1.6+Math.random()*0.8);
-  const phase=r===3?Math.PI:Math.random()*1.5;
+  const phase = Math.random()*Math.PI*2;
   for(let dx=-rho*2|0;dx<rho*2;dx++)for(let dy=-rho*2|0;dy<rho*2;dy++)for(let dz=-rho*2|0;dz<rho*2;dz++){
     const x=Math.floor(x0+dx),y=Math.floor(y0+dy),z=Math.floor(z0+dz);
     if(x<0||x>=size||y<0||y>=size||z<0||z>=size) continue;
@@ -111,24 +122,19 @@ setInterval(()=>{
   for(let i=0;i<field.length;i++) field[i] *= decay;
   if(Math.random() < 0.16 * speed) createCluster();
 
-  const power=new Array(8).fill(0);
+  const power=new Array(roleWeights.length).fill(0);
   let Q=0, bright=0;
   for(let i=0;i<field.length;i++){
     const v=field[i]; Q+=v;
     const a=Math.abs(v);
     if(a>0.45) bright++;
-    if(a>0.38) power[3]+=a*1.4;
-    power[Math.floor(Math.random()*8)] += a*0.15;
+    power[Math.floor(Math.random()*roleWeights.length)] += a*0.15;
   }
   const sum=power.reduce((a,b)=>a+b)||1;
   const perc = power.map(p=>p/sum*100);
 
   let txt = bright<10 ? "чистый вакуум" :
-            perc[3]>42 ? `тревожная ${perc[3].toFixed(1)}%` :
-            perc[0]>38 ? `творец ${perc[0].toFixed(1)}%` :
-            Q<-1.2 ? `Q ${Q.toFixed(2)} — тревога` :
-            Q>1.4 ? `Q ${Q.toFixed(2)} — цельность` :
-            `тревожная ${perc[3].toFixed(1)}% · творец ${perc[0].toFixed(1)}%`;
+            clusterNames.slice(0,5).map((n,i)=>`${n} ${perc[i].toFixed(0)}%`).join(" · ");
   document.getElementById('desc').textContent = txt;
 
   ctx.fillStyle='#000008';
@@ -153,6 +159,14 @@ function showUsername(){
   setTimeout(()=>document.getElementById('user').focus(),300);
 }
 
+let model = null;
+async function getModel(){
+  if(model) return model;
+  document.getElementById('loading').textContent = "Загружаю ИИ-мозг… (80 Мб, один раз)";
+  model = await Xenova.pipeline('feature-ex-extraction', 'Xenova/all-MiniLM-L6-v2');
+  return model;
+}
+
 async function enter(){
   const raw = document.getElementById('user').value.trim().replace(/^@/,'');
   if(!raw){ alert("Введи username"); return; }
@@ -162,50 +176,74 @@ async function enter(){
   document.getElementById('downloadBtn').classList.remove('active');
 
   let profileData = null;
-  let fullText = "";
+  let sentences = [];
 
   try {
     const res = await fetch("https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token="+APIFY_TOKEN, {
       method: "POST",
       headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ usernames: [raw], resultsLimit: 20 })
+      body: JSON.stringify({ usernames: [raw], resultsLimit: 30 })
     });
     const data = await res.json();
 
     if (Array.isArray(data) && data[0]) {
       profileData = data[0];
+      const bio = profileData.biography || "";
       const posts = profileData.latestPosts || [];
-      fullText = ((profileData.biography || "") + " " + posts.map(p => p.caption || "").join(" ")).toLowerCase();
-
-      // Персонализация ролей
-      const keywords = [
-        ["арт","творчеств","худож","картин","выставк","куратор"],
-        ["мама","дети","ребён","сын","доч"],
-        ["доч","папа","мама","родител"],
-        ["тревог","страх","паник","нерв","боюс","депрес"],
-        ["куратор","биеннал","галере","арт-пространств"],
-        ["тело","йога","спорт","боль","здоровь"],
-        ["постчеловек","киборг","ai","нейросет","трансгуман"],
-        ["наблюда","квантов","сознани","медитац","духовн"]
-      ];
-      keywords.forEach((words,i) => {
-        if (words.some(w => fullText.includes(w))) roleWeights[i] *= 3.5;
-      });
+      if(bio.trim()) sentences.push(bio.trim());
+      posts.forEach(p => { if(p.caption && p.caption.trim()) sentences.push(p.caption.trim()); });
     }
   } catch(e) {
-    console.log("Instagram временно недоступен");
+    console.log("Instagram недоступен");
   }
 
-  // === TXT ПАСПОРТ ===
-  let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\nДата: ${new Date().toLocaleString('ru-RU')}\n\n`;
-  if (profileData) {
-    txt += `Имя: ${profileData.fullName || "—"}\nБио: ${profileData.biography || "—"}\nПостов: ${(profileData.latestPosts || []).length}\n\n`;
-    (profileData.latestPosts || []).forEach((p,i) => {
-      txt += `Пост ${i+1}\n${p.caption || "(без текста)"}\nЛайков: ${p.likesCount || 0}   Комментов: ${p.commentsCount || 0}\n\n`;
-    });
-  } else {
-    txt += "Профиль приватный или Instagram временно недоступен\nПортрет создан на базовых ролях\n";
+  if(sentences.length === 0){
+    finishWithFallback(raw, profileData);
+    return;
   }
+
+  document.getElementById('loading').textContent = "Анализирую твою онтологию…";
+
+  try {
+    const model = await getModel();
+    const embeddings = [];
+    for(const sent of sentences){
+      const out = await model(sent, { pooling: 'mean', normalize: true });
+      embeddings.push(Array.from(out.data));
+    }
+
+    let bestK = Math.max(5, Math.min(12, Math.floor(embeddings.length/3)));
+    const { clusters } = kmeans(embeddings, bestK);
+
+    const clusterTexts = Array(bestK).fill().map(()=>[]);
+    sentences.forEach((s,i)=> clusterTexts[clusters[i]].push(s));
+
+    clusterNames = [];
+    roleWeights = [];
+    for(const texts of clusterTexts){
+      const words = texts.join(" ").toLowerCase()
+        .replace(/[^а-яa-z0-9\s]/g,' ')
+        .split(/\s+/).filter(w=>w.length>3);
+      const freq = {};
+      words.forEach(w=> freq[w] = (freq[w]||0)+1);
+      const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]);
+      clusterNames.push(top.length ? top.join(" ") : "тайна");
+      roleWeights.push(texts.length);
+    }
+    const sumW = roleWeights.reduce((a,b)=>a+b,0);
+    roleWeights = roleWeights.map(w => w/sumW * 12);
+
+  } catch(e) {
+    console.log("ИИ не загрузился — используем базовые роли");
+  }
+
+  // TXT с онтологией
+  let txt = `КВАНТОВАЯ ОНТОЛОГИЯ · @${raw}\nДата: ${new Date().toLocaleString('ru-RU')}\n\n`;
+  txt += `Найдено версий себя: ${clusterNames.length}\n\n`;
+  clusterNames.forEach((name,i) => {
+    txt += `${i+1}. ${name.toUpperCase()} (${roleWeights[i].toFixed(1)})\n`;
+  });
+  txt += `\n\nИсходные тексты:\n` + sentences.map((s,i)=>`${i+1}. ${s}`).join('\n');
 
   const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
   const url = URL.createObjectURL(blob);
@@ -213,19 +251,50 @@ async function enter(){
   btn.onclick = () => {
     const a = document.createElement('a');
     a.href = url;
-    a.download = `quantum-passport_${raw}_${new Date().toISOString().slice(0,10)}.txt`;
+    a.download = `ontology_${raw}_${new Date().toISOString().slice(0,10)}.txt`;
     a.click();
   };
   btn.classList.add('active');
 
-  document.title = `Квантовая идентичность · @${raw}`;
+  document.title = `Квантовая онтология · @${raw}`;
   document.getElementById('loading').style.display = 'none';
   document.getElementById('username').classList.remove('active');
   canvas.classList.add('clear');
   document.getElementById('back').classList.add('active');
   document.getElementById('speed').classList.add('active');
   document.getElementById('desc').classList.add('active');
-  document.getElementById('desc').textContent = profileData ? `@${raw} · квантовый портрет готов` : `@${raw} · базовый портрет`;
+  document.getElementById('desc').textContent = `@${raw} · ${clusterNames.slice(0,5).join(" · ")}`;
+}
+
+function finishWithFallback(username, profileData){
+  let txt = `КВАНТОВЫЙ ПАСПОРТ · @${username}\nДата: ${new Date().toLocaleString('ru-RU')}\n\n`;
+  if (profileData) {
+    txt += `Имя: ${profileData.fullName || "—"}\nБио: ${profileData.biography || "—"}\nПостов: ${(profileData.latestPosts || []).length}\n\n`;
+    (profileData.latestPosts || []).forEach((p,i) => {
+      txt += `Пост ${i+1}\n${p.caption || "(без текста)"}\nЛайков: ${p.likesCount || 0}\n\n`;
+    });
+  } else {
+    txt += "Профиль приватный — портрет на базовых ролях\n";
+  }
+  const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const btn = document.getElementById('downloadBtn');
+  btn.onclick = () => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `quantum-passport_${username}_${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
+  };
+  btn.classList.add('active');
+
+  document.title = `Квантовая идентичность · @${username}`;
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('username').classList.remove('active');
+  canvas.classList.add('clear');
+  document.getElementById('back').classList.add('active');
+  document.getElementById('speed').classList.add('active');
+  document.getElementBy Sainte.add('active');
+  document.getElementById('desc').textContent = `@${username} · базовый портрет`;
 }
 
 document.getElementById('back').onclick = () => location.reload();
@@ -233,4 +302,3 @@ document.getElementById('user')?.addEventListener('keypress', e=>{if(e.key==='En
 </script>
 </body>
 </html>
-
