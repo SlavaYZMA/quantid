@@ -65,6 +65,7 @@
 <div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ (TXT)</div>
 
 <script>
+// ТВОЙ ТОКЕН + НАДЁЖНЫЙ АКТОР (работает в 2025)
 const APIFY_TOKEN = "apify_api_XFk4W4rmvDDfnSxhsYzkUbHnHPdJ0R1I2wyz";
 
 const canvas = document.getElementById('c');
@@ -160,20 +161,22 @@ async function enter(){
   document.getElementById('downloadBtn').classList.remove('active');
 
   let profileData = null;
+  let fullText = "";
 
   try {
-    const res = await fetch("https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token="+APIFY_TOKEN, {
+    const res = await fetch("https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token="+APIFY_TOKEN, {
       method: "POST",
       headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({usernames:[raw], resultsLimit:20})
+      body: JSON.stringify({ usernames: [raw], resultsLimit: 20 })
     });
     const data = await res.json();
 
-    if(data && data[0]){
+    if (Array.isArray(data) && data[0]) {
       profileData = data[0];
+      const posts = profileData.latestPosts || [];
+      fullText = ((profileData.biography || "") + " " + posts.map(p => p.caption || "").join(" ")).toLowerCase();
 
-      // Персонализация пены
-      const text = (profileData.bio || "") + " " + profileData.latestPosts.map(p=>p.caption||"").join(" ").toLowerCase();
+      // Персонализация ролей
       const keywords = [
         ["арт","творчеств","худож","картин","выставк","куратор"],
         ["мама","дети","ребён","сын","доч"],
@@ -184,35 +187,32 @@ async function enter(){
         ["постчеловек","киборг","ai","нейросет","трансгуман"],
         ["наблюда","квантов","сознани","медитац","духовн"]
       ];
-      keywords.forEach((words,i)=>{
-        if(words.some(w=>text.includes(w))) roleWeights[i] *= 3.2;
+      keywords.forEach((words,i) => {
+        if (words.some(w => fullText.includes(w))) roleWeights[i] *= 3.5;
       });
     }
   } catch(e) {
-    console.log("Instagram временно недоступен — используем базовый портрет");
+    console.log("Instagram временно недоступен");
   }
 
-  // === ФОРМИРУЕМ И СКАЧИВАЕМ TXT ===
-  const username = raw;
-  let txtContent = `КВАНТОВЫЙ ПАСПОРТ · @${username}\n`;
-  txtContent += `Дата создания: ${new Date().toLocaleString('ru-RU')}\n\n`;
-
-  if(profileData){
-    txtContent += `Имя: ${profileData.fullName || "—"} \nБио: ${profileData.bio || "—"}\nПостов проанализировано: ${profileData.latestPosts.length}\n\n`;
-    profileData.latestPosts.forEach((p,i)=>{
-      txtContent += `Пост ${i+1}\n${p.caption || "(без текста)"}\nЛайков: ${p.likesCount}   Комментов: ${p.commentsCount}\n\n`;
+  // === TXT ПАСПОРТ ===
+  let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\nДата: ${new Date().toLocaleString('ru-RU')}\n\n`;
+  if (profileData) {
+    txt += `Имя: ${profileData.fullName || "—"}\nБио: ${profileData.biography || "—"}\nПостов: ${(profileData.latestPosts || []).length}\n\n`;
+    (profileData.latestPosts || []).forEach((p,i) => {
+      txt += `Пост ${i+1}\n${p.caption || "(без текста)"}\nЛайков: ${p.likesCount || 0}   Комментов: ${p.commentsCount || 0}\n\n`;
     });
   } else {
-    txtContent += "Instagram временно недоступен — портрет создан на базовых весах\n";
+    txt += "Профиль приватный или Instagram временно недоступен\nПортрет создан на базовых ролях\n";
   }
 
-  const blob = new Blob([txtContent], {type: "text/plain;charset=utf-8"});
+  const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   const btn = document.getElementById('downloadBtn');
   btn.onclick = () => {
     const a = document.createElement('a');
     a.href = url;
-    a.download = `quantum-passport_${username}_${new Date().toISOString().slice(0,10)}.txt`;
+    a.download = `quantum-passport_${raw}_${new Date().toISOString().slice(0,10)}.txt`;
     a.click();
   };
   btn.classList.add('active');
