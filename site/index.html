@@ -57,7 +57,6 @@
 </style>
 </head>
 <body>
-
 <canvas id="c"></canvas>
 
 <!-- Слой 1 — вступление -->
@@ -89,7 +88,7 @@
 <div class="desc" id="desc">загрузка...</div>
 
 <script>
-// === КВАНТОВАЯ СИМУЛЯЦИЯ (остаётся без изменений) ===
+// === КВАНТОВАЯ СИМУЛЯЦИЯ (без изменений) ===
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 canvas.width = innerWidth; canvas.height = innerHeight;
@@ -178,7 +177,7 @@ setInterval(()=>{
   }
 },16);
 
-// === ПЕРЕХОДЫ + ПАРСИНГ INSTAGRAM + СКАЧИВАНИЕ TXT ===
+// === ПЕРЕХОДЫ + ПАРСИНГ С ТВОЕГО ЖИВОГО БЭКЕНДА ===
 function showUsername(){
   document.getElementById('welcome').classList.remove('active');
   document.getElementById('username').classList.add('active');
@@ -188,7 +187,7 @@ function showUsername(){
 function enter(){
   const u = document.getElementById('user').value.trim().replace(/^@/,'') || '';
   if (!u) {
-    alert("Введи настоящий Instagram username");
+    alert("Введи настоящий Instagram-username");
     return;
   }
 
@@ -200,44 +199,40 @@ function enter(){
   document.getElementById('desc').classList.add('active');
   document.getElementById('desc').textContent = `сканирую Instagram @${u}… 15–40 сек`;
 
-  fetch(`https://quantid-backend.onrender.com/parse?u=${u}`)
+  fetch(`https://quantid-backend-production.up.railway.app/parse?u=${u}`)
     .then(r => r.json())
     .then(res => {
       if (res.status === "success") {
         document.getElementById('desc').textContent = 
           `@${u} · ${res.data.captions.length} постов · квантовый паспорт готов`;
 
-        // Убираем старую кнопку, если была
         const oldBtn = document.getElementById('download-btn');
         if (oldBtn) oldBtn.remove();
 
-        // Новая кнопка скачивания
         const btn = document.createElement('div');
         btn.id = 'download-btn';
         btn.innerHTML = 'СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ (TXT)';
         btn.style.cssText = `
           position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
-          background:#fff; color:#000; padding:18px 36px; font-size:19px;
-          cursor:pointer; z-index:30; letter-spacing:2px; font-weight:600;
-          box-shadow:0 10px 40px rgba(0,0,0,0.6);
+          background:rgba(255,255,255,0.96); color:#000; padding:20px 40px; font-size:20px;
+          cursor:pointer; z-index:30; letter-spacing:3px; font-weight:600;
+          border:2px solid #fff; border-radius:8px;
+          box-shadow:0 15px 50px rgba(0,0,0,0.7);
         `;
         btn.onclick = () => window.open(res.download_url, '_blank');
         document.body.appendChild(btn);
 
-        // Здесь в будущем можно добавить персонализацию симуляции по словам из постов
       } else {
         document.getElementById('desc').textContent = "профиль приватный или Instagram временно недоступен";
       }
     })
     .catch(err => {
-      document.getElementById('desc').textContent = "сервер просыпается (Render Free) — подожди 15–20 сек и нажми ещё раз";
+      document.getElementById('desc').textContent = "сервер просыпается — подожди 15–20 сек и попробуй снова";
     });
 }
 
 document.getElementById('back').onclick = () => location.reload();
-document.getElementById('user')?.addEventListener('keypress', e=>{
-  if(e.key==='Enter') enter();
-});
+document.getElementById('user')?.addEventListener('keypress', e=>{if(e.key==='Enter') enter()});
 </script>
 </body>
 </html>
