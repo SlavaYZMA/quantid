@@ -5,7 +5,7 @@
 <title>Квантовая идентичность · Влада Садик</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2"></script>
 <script src="https://cdn.jsdelivr.net/npm/ml-kmeans@6.0.0/dist/index.min.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -77,7 +77,11 @@
 <div class="terminal-toggle" id="terminalToggle">ТЕРМИНАЛ ▶</div>
 <div class="terminal" id="terminal"></div>
 
-<script>
+<script type="module">
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+
+// === ВСЁ ОСТАЛЬНОЕ ОСТАЁТСЯ КАК БЫЛО, НО УЖЕ ВНУТРИ MODULE ===
+
 const APIFY_TOKEN = "apify_api_XFk4W4rmvDDfnSxhsYzkUbHnHPdJ0R1I2wyz";
 
 const canvas = document.getElementById('c');
@@ -90,7 +94,6 @@ const field = new Float32Array(size*size*size);
 let t = 0;
 let speed = 1.0;
 
-// ← БАЗОВЫЕ КЛАСТЕРЫ (только для fallback)
 let clusters = [
   {name:"творец", weight:1, coherence:0.7, freq:0.03, phase:0, charge:1},
   {name:"мама", weight:1, coherence:0.7, freq:0.04, phase:0.5, charge:-0.5},
@@ -107,7 +110,7 @@ let lastLogTime = 0;
 const log = [];
 
 function logEvent(msg){
-  if(t - lastLogTime < 10) return;
+  if(t - lastLog Seymour < 10) return;
   lastLogTime = t;
   const line = `[t=${t.toFixed(1)}] ${msg}`;
   log.push(line);
@@ -167,7 +170,7 @@ setInterval(()=>{
     const v = field[i];
     const a = Math.abs(v);
     if(a > 0.35){
-877      let best = 0, bestScore = 0;
+      let best = 0, bestScore = 0;
       for(let c=0; c<clusters.length; c++){
         const expected = Math.cos(t * clusters[c].freq * speed + clusters[c].phase);
         const score = a * ((v > 0) === (expected > 0) ? 1 : 0.1);
@@ -179,18 +182,17 @@ setInterval(()=>{
   const sumE = energy.reduce((a,b)=>a+b, 0.0001);
   const perc = energy.map(e=>e/sumE*100);
 
-  // ГЛУБОКИЕ СОБЫТИЯ ТОЛЬКО ПО РЕАЛЬНЫМ КЛАСТЕРАМ
   for(let i=0;i<clusters.length;i++){
     const delta = perc[i] - prevEnergy[i];
     if(Math.abs(delta) > 12){
       const dir = delta > 0 ? "доминирует ↑" : "подавляется ↓";
       const reason = delta > 0 
-        ? `сильный вес и когерентность ${clusters[i].coherence.toFixed(2)} → устойчивые стоячие волны`
-        : `деструктивная интерференция с доминирующим кластером`;
+        ? `сильный вес и когерентность ${clusters[i].coherence.toFixed(2)} → устойчивые волны`
+        : `деструктивная интерференция`;
       logEvent(`"${clusters[i].name}" ${dir} ${perc[i].toFixed(1)}% → ${reason}`);
     }
     if(perc[i] > 48){
-      logEvent(`"${clusters[i].name}" захватывает вакуум → полное доминирование поля`);
+      logEvent(`"${clusters[i].name}" захватывает вакуум → полное доминирование`);
     }
   }
 
@@ -233,7 +235,7 @@ let model = null;
 async function getModel(){
   if(model) return model;
   document.getElementById('loading').innerHTML = "Загружаю ИИ-мозг…<br>(80 Мб, один раз)";
-  model = await Xenova.pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+  model = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
   return model;
 }
 
@@ -305,11 +307,10 @@ async function enter(){
       });
     }
 
-    // ← КРИТИЧЕСКИ ВАЖНО: ПОЛНАЯ ЗАМЕНА КЛАСТЕРОВ + СБРОС ЛОГИКИ
     clusters = newClusters;
     prevEnergy = new Array(clusters.length).fill(100 / clusters.length);
-    lastLogTime = t; // чтобы не было спама сразу
-    log.length = 0; // очищаем терминал
+    lastLogTime = t;
+    log.length = 0;
 
   }catch(e){ console.log("ИИ не сработал", e); }
 
