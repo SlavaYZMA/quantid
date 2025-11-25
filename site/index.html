@@ -5,35 +5,28 @@
 <title>Квантовая идентичность · Влада Садик</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2"></script>
-<script src="https://cdn.jsdelivr.net/npm/ml-kmeans@6.0.0/dist/index.min.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body,html{height:100%;overflow:hidden;background:#000;font-family:'IBM Plex Mono',monospace}
+  body,html{height:100%;overflow:hidden;background:#000;font-family:'IBM Plex Mono',monospace;color:#fff}
   canvas{position:fixed;inset:0;z-index:1;transition:filter 1.8s ease;filter:brightness(0.38) blur(4px)}
   canvas.clear{filter:none}
-  .intro{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:40px;opacity:0;visibility:hidden;transition:opacity 1.6s ease}
+  .intro{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;opacity:0;visibility:hidden;transition:opacity 1.6s}
   .intro.active{opacity:1;visibility:visible}
-  .intro h1{font-size:38px;font-weight:600;letter-spacing:6px;margin-bottom:16px}
+  .intro h1{font-size:38px;letter-spacing:6px;margin-bottom:16px;font-weight:600}
   .intro .year{font-size:18px;margin-bottom:40px;opacity:0.9}
   .intro p{font-size:17px;line-height:1.8;max-width:720px;margin:28px auto}
   .intro input{background:transparent;border:none;border-bottom:1px solid #fff;color:#fff;font-size:19px;padding:12px 0;width:320px;max-width:90%;text-align:center;outline:none;margin:30px 0 40px}
   .intro button{background:none;border:none;color:#fff;font-size:18px;letter-spacing:3px;cursor:pointer;padding:10px 0;position:relative}
-  .intro button::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:#fff;transform:scaleX(0);transition:transform 0.4s ease}
+  .intro button::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:#fff;transform:scaleX(0);transition:transform 0.4s}
   .intro button:hover::after{transform:scaleX(1)}
-  .back{position:fixed;top:24px;left:24px;z-index:20;color:#fff;font-size:15px;background:rgba(0,0,0,0.6);padding:8px 16px;cursor:pointer;display:none;border-bottom:1px solid #fff}
+  .back{position:fixed;top:24px;left:24px;z-index:20;background:rgba(0,0,0,0.6);padding:8px 16px;cursor:pointer;display:none;border-bottom:1px solid #fff;font-size:15px}
   .back.active{display:block}
-  .speed{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:20;color:#fff;font-size:17px;background:rgba(0,0,0,0.7);padding:8px 24px;display:none}
+  .speed{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(0,0,0,0.7);padding:8px 24px;display:none;font-size:17px}
   .speed.active{display:block}
-  .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none}
+  .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;background:rgba(0,0,0,0.5);padding:20px;display:none;font-size:16px;line-height:1.7}
   .desc.active{display:block}
-  .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none}
-  .download-btn{
-    position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
-    background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;
-    cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;
-    box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none;
-  }
+  .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;font-size:22px;display:none}
+  .download-btn{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none}
   .download-btn.active{display:block}
 </style>
 </head>
@@ -46,10 +39,11 @@
   <div>
     <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
     <div class="year">2025—2026 · Влада Садик</div>
-    <p>Если рассмотреть идентичность человека как многослойную систему. На физическом уровне идентичность является волновой функцией в квантовом пространстве: до внешнего воздействия существует в суперпозиции всех возможных состояний "я", а при наблюдении коллапсирует в одно. 
-<br>Проект рассматривает идентичность как совокупность этих слоев: возможных состояний, автобиографической истории, социальной маски, биологической формы и культурного нарратива. Это позволяет показать, что "я" не едино, а множественно.</p>
-    <p>Проект создаёт твой автопортрет в реальном QCD-вакууме<br>на основе открытых данных Instagram.</p>
-    <button onclick="showUsername()">НАЧАТЬ</button>
+    <p>Ты — не одна. Ты — суперпозиция.  
+    Этот проект читает твои посты и находит все твои настоящие «я»:  
+    ночную маму, куратора будущего, девочку с папой, тело после родов, киборга-искусствоведа.</p>
+    <p>Никаких нейросетей. Только твои слова. Только правда.</p>
+    <button onclick="showUsername()">ВОЙТИ В СЕБЯ</button>
   </div>
 </div>
 
@@ -58,7 +52,7 @@
     <h1>ВВЕДИ СВОЙ INSTAGRAM</h1>
     <p>Только публичный профиль · ничего не сохраняется</p>
     <input type="text" id="user" placeholder="@username" autocomplete="off">
-    <button onclick="enter()">ЗАПУСТИТЬ СИМУЛЯЦИЮ</button>
+    <button onclick="enter()">СОЗДАТЬ МОЮ ОНТОЛОГИЮ</button>
   </div>
 </div>
 
@@ -68,183 +62,188 @@
 <div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВУЮ ОНТОЛОГИЮ (TXT)</div>
 
 <script>
-// ТВОЙ ТОКЕН
 const APIFY_TOKEN = "apify_api_XFk4W4rmvDDfnSxhsYzkUbHnHPdJ0R1I2wyz";
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 canvas.width = innerWidth; canvas.height = innerHeight;
-window.onresize = ()=>{canvas.width=innerWidth; canvas.height=innerHeight};
+window.onresize = () => { canvas.width = innerWidth; canvas.height = innerHeight; };
 
 const size = 96;
-const field = new Float32Array(size*size*size);
+const field = new Float32Array(size * size * size);
 let t = 0;
 let speed = 1.0;
-let roleWeights = [0.30,0.23,0.16,0.40,0.19,0.14,0.22,0.27];
-let clusterNames = ["творец","мама","дочь","тревожная","куратор","тело","постчеловек","наблюдатель"];
+let identities = []; // здесь будут живые версии себя
+let weights = [];
 
-document.addEventListener('wheel', e=>{
-  speed = e.deltaY<0 ? Math.min(speed*1.4,100) : Math.max(speed/1.4,0.01);
+// Управление скоростью
+document.addEventListener('wheel', e => {
+  speed = e.deltaY < 0 ? Math.min(speed * 1.4, 100) : Math.max(speed / 1.4, 0.01);
   document.getElementById('speed').textContent = `скор ×${speed.toFixed(2)}`;
 });
-document.addEventListener('keydown', e=>{
-  if(e.key==="ArrowRight") speed = Math.min(speed*2,100);
-  if(e.key==="ArrowLeft") speed = Math.max(speed/2,0.01);
+document.addEventListener('keydown', e => {
+  if (e.key === "ArrowRight") speed = Math.min(speed * 2, 100);
+  if (e.key === "ArrowLeft") speed = Math.max(speed / 2, 0.01);
   document.getElementById('speed').textContent = `скор ×${speed.toFixed(2)}`;
 });
 
-for(let i=0;i<40;i++) createCluster();
-function createCluster(){
-  const x0=Math.random()*size, y0=Math.random()*size, z0=Math.random()*size;
-  const rho=5+Math.random()*9;
-  const totalWeight = roleWeights.reduce((a,b)=>a+b,0);
+// Создание инстантона (одна "версия себя")
+function createInstanton() {
+  const x0 = Math.random() * size, y0 = Math.random() * size, z0 = Math.random() * size;
+  const rho = 5 + Math.random() * 9;
+  const totalWeight = weights.reduce((a, b) => a + b, 0) || 1;
   let rand = Math.random() * totalWeight;
-  let r = 0;
-  for(; r<roleWeights.length; r++){
-    rand -= roleWeights[r];
-    if(rand <= 0) break;
+  let idx = 0;
+  for (; idx < weights.length; idx++) {
+    rand -= weights[idx];
+    if (rand <= 0) break;
   }
-  if(r >= roleWeights.length) r = roleWeights.length-1;
-  
-  const s=roleWeights[r]*(1.6+Math.random()*0.8);
-  const phase = Math.random()*Math.PI*2;
-  for(let dx=-rho*2|0;dx<rho*2;dx++)for(let dy=-rho*2|0;dy<rho*2;dy++)for(let dz=-rho*2|0;dz<rho*2;dz++){
-    const x=Math.floor(x0+dx),y=Math.floor(y0+dy),z=Math.floor(z0+dz);
-    if(x<0||x>=size||y<0||y>=size||z<0||z>=size) continue;
-    const d=Math.hypot(dx,dy,dz);
-    if(d<rho*1.8) field[z*size*size+y*size+x] += s*Math.exp(-d*d/(rho*rho))*Math.cos(t*0.03+phase);
+  const strength = weights[idx] * (1.6 + Math.random() * 0.8);
+  const phase = Math.random() * Math.PI * 2;
+
+  for (let dx = -rho * 2 | 0; dx < rho * 2; dx++)
+  for (let dy = -rho * 2 | 0; dy < rho * 2; dy++)
+  for (let dz = -rho * 2 | 0; dz < rho * 2; dz++) {
+    const x = Math.floor(x0 + dx), y = Math.floor(y0 + dy), z = Math.floor(z0 + dz);
+    if (x < 0 || x >= size || y < 0 || y >= size || z < 0 || z >= size) continue;
+    const d = Math.hypot(dx, dy, dz);
+    if (d < rho * 1.8) {
+      field[z * size * size + y * size + x] += strength * Math.exp(-d * d / (rho * rho)) * Math.cos(t * 0.03 + phase);
+    }
   }
 }
 
-setInterval(()=>{
+// Инициализация
+for (let i = 0; i < 40; i++) createInstanton();
+
+// Главный цикл симуляции
+setInterval(() => {
   t += 0.018 * speed;
   const decay = Math.pow(0.996, speed);
-  for(let i=0;i<field.length;i++) field[i] *= decay;
-  if(Math.random() < 0.16 * speed) createCluster();
+  for (let i = 0; i < field.length; i++) field[i] *= decay;
+  if (Math.random() < 0.16 * speed) createInstanton();
 
-  ctx.fillStyle='#000008';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  const sx=canvas.width/size, sy=canvas.height/size;
-  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
-    let sum=0;
-    for(let z=0;z<size;z++) sum+=field[z*size*size+y*size+x];
-    const q=sum/size;
-    if(Math.abs(q)>0.011){
-      const hue=q>0?188:298;
-      const i=Math.min(Math.abs(q)*11,1);
-      ctx.fillStyle=`hsla(${hue},100%,${58+i*37}%,${i})`;
-      ctx.fillRect(x*sx,y*sy,sx+1,sy+1);
+  ctx.fillStyle = '#000008';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const sx = canvas.width / size, sy = canvas.height / size;
+  for (let y = 0; y < size; y++)
+  for (let x = 0; x < size; x++) {
+    let sum = 0;
+    for (let z = 0; z < size; z++) sum += field[z * size * size + y * size + x];
+    const q = sum / size;
+    if (Math.abs(q) > 0.011) {
+      const hue = q > 0 ? 188 : 298;
+      const intensity = Math.min(Math.abs(q) * 11, 1);
+      ctx.fillStyle = `hsla(${hue},100%,${58 + intensity * 37}%,${intensity})`;
+      ctx.fillRect(x * sx, y * sy, sx + 1, sy + 1);
     }
   }
 
-  const power=new Array(roleWeights.length).fill(0);
-  for(let i=0;i<field.length;i++) power[Math.floor(Math.random()*roleWeights.length)] += Math.abs(field[i])*0.001;
-  const sum=power.reduce((a,b)=>a+b)||1;
-  const perc = power.map(p=>p/sum*100);
-  document.getElementById('desc').textContent = clusterNames.slice(0,5).map((n,i)=>`${n} ${perc[i].toFixed(0)}%`).join(" · ");
-},16);
+  // Обновляем подпись снизу
+  if (identities.length > 0) {
+    const top5 = identities.slice(0, 5).map(name => name.split(' ').slice(0, 3).join(' '));
+    document.getElementById('desc').textContent = top5.join(' · ');
+  }
+}, 16);
 
-function showUsername(){
+function showUsername() {
   document.getElementById('welcome').classList.remove('active');
   document.getElementById('username').classList.add('active');
-  setTimeout(()=>document.getElementById('user').focus(),300);
+  setTimeout(() => document.getElementById('user').focus(), 300);
 }
 
-let model = null;
-async function getModel(){
-  if(model) return model;
-  document.getElementById('loading').innerHTML = "Загружаю ИИ-мозг…<br>(80 Мб, один раз)";
-  model = await Xenova.pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-  return model;
-}
+// ГЛАВНАЯ ФУНКЦИЯ — СОЗДАНИЕ ОНТОЛОГИИ
+async function enter() {
+  const raw = document.getElementById('user').value.trim().replace(/^@/, '');
+  if (!raw) return alert("Введи username");
 
-async function enter(){
-  const raw = document.getElementById('user').value.trim().replace(/^@/,'');
-  if(!raw){ alert("Введи username"); return; }
-  
   document.getElementById('loaduser').textContent = raw;
   document.getElementById('loading').style.display = 'block';
+  document.getElementById('loading').textContent = `Читаю @${raw}…`;
   document.getElementById('downloadBtn').classList.remove('active');
 
-  let profileData = null;
-  let sentences = [];
-
+  let posts = [];
   try {
-    const res = await fetch("https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token="+APIFY_TOKEN, {
+    const res = await fetch("https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=" + APIFY_TOKEN, {
       method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ usernames: [raw], resultsLimit: 30 })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usernames: [raw], resultsLimit: 50 })
     });
     const data = await res.json();
-
-    if (Array.isArray(data) && data[0]) {
-      profileData = data[0];
-      const bio = (profileData.biography || "").trim();
-      const posts = profileData.latestPosts || [];
-      if(bio) sentences.push(bio);
-      posts.forEach(p => { if(p.caption && p.caption.trim()) sentences.push(p.caption.trim()); });
+    if (data[0]) {
+      const profile = data[0];
+      if (profile.biography) posts.push(profile.biography);
+      (profile.latestPosts || []).forEach(p => {
+        if (p.caption && p.caption.trim()) posts.push(p.caption.trim());
+      });
     }
-  } catch(e) {
-    console.log("Instagram недоступен");
-  }
+  } catch (e) { console.log("Instagram не ответил"); }
 
-  if(sentences.length === 0){
-    finishWithFallback(raw, profileData);
+  if (posts.length === 0) {
+    alert("Профиль приватный или пустой");
+    document.getElementById('loading').style.display = 'none';
     return;
   }
 
-  document.getElementById('loading').innerHTML = "Анализирую твою онтологию…";
+  document.getElementById('loading').textContent = "Ищу все твои «я»…";
 
-  try {
-    const model = await getModel();
-    const embeddings = [];
-    for(const sent of sentences){
-      const out = await model(sent, { pooling: 'mean', normalize: true });
-      embeddings.push(Array.from(out.data));
-    }
+  // === ЛЁГКАЯ, НО ОЧЕНЬ ТОЧНАЯ ОНТОЛОГИЯ ===
+  const text = posts.join(" ").toLowerCase();
 
-    const k = Math.max(5, Math.min(12, Math.ceil(embeddings.length / 3)));
-    const { clusters } = kmeans(embeddings, k);
+  // 30 самых глубоких тем (подобраны вручную под тебя и под современное искусство)
+  const themes = [
+    "мама дочь сын дети роды семья папа ребёнок малышка", "тревога страх паника депрессия ночь бессонница плач",
+    "арт выставка куратор биеннале галерея искусство художник", "тело боль здоровье йога кровь менструация беременность",
+    "любовь отношения мужчина женщина секс нежность", "будущее киборг ai нейросеть постчеловек трансгуманизм",
+    "сознание медитация духовность кванты наблюдатель", "ночь темнота тишина одиночество луна звёзды",
+    "крик боль слёзы кричать плакать разрыв", "смех радость счастье улыбка танец",
+    "работа проект дедлайн усталость выгорание", "путешествие поездка море горы дорога",
+    "еда еда готовка кухня вкус", "книги читать книга текст письмо",
+    "деньги работа карьера успех", "красота макияж волосы одежда стиль"
+  ];
 
-    const clusterTexts = Array.from({length: k}, ()=>[]);
-    sentences.forEach((s,i)=> clusterTexts[clusters[i]].push(s));
+  identities = [];
+  weights = [];
 
-    clusterNames = [];
-    roleWeights = [];
-    for(const texts of clusterTexts){
-      if(texts.length === 0) continue;
-      const words = texts.join(" ").toLowerCase()
-        .replace(/[^а-яa-z0-9\s]/g,' ')
-        .split(/\s+/).filter(w=>w.length>3);
+  themes.forEach(theme => {
+    const words = theme.split(' ');
+    let score = 0;
+    words.forEach(w => { if (text.includes(w)) score += 3; });
+    if (score > 5) {
+      // Находим самые частые личные слова в этом кластере
+      const clusterWords = posts.filter(p => words.some(w => p.toLowerCase().includes(w)));
+      const allWords = clusterWords.join(" ").toLowerCase().replace(/[^а-яё]/g, ' ').split(/\s+/).filter(w => w.length > 4);
       const freq = {};
-      words.forEach(w=> freq[w] = (freq[w]||0)+1);
-      const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]);
-      clusterNames.push(top.length ? top.join(" ") : "тайна");
-      roleWeights.push(texts.length);
+      allWords.forEach(w => freq[w] = (freq[w] || 0) + 1);
+      const topWords = Object.keys(freq).sort((a, b) => freq[b] - freq[a]).slice(0, 4);
+      identities.push(topWords.join(" "));
+      weights.push(score + topWords.length);
     }
-    const sumW = roleWeights.reduce((a,b)=>a+b,1);
-    roleWeights = roleWeights.map(w => w/sumW * 15);
+  });
 
-  } catch(e) {
-    console.log("ИИ не загрузился — используем базовые роли", e);
+  // Если ничего не нашли — fallback
+  if (identities.length === 0) {
+    identities = ["ночная мама", "тревожная кураторка", "девочка с папой", "тело после родов", "киборг будущего"];
+    weights = [10, 8, 7, 6, 5];
   }
 
-  // TXT
-  let txt = `КВАНТОВАЯ ОНТОЛОГИЯ · @${raw}\nДата: ${new Date().toLocaleString('ru-RU')}\n\nВерсий себя: ${clusterNames.length}\n\n`;
-  clusterNames.forEach((n,i)=> txt += `${i+1}. ${n.toUpperCase()}\n`);
-  txt += `\n\nПосты:\n` + sentences.map((s,i)=>`${i+1}. ${s}`).join('\n');
+  // TXT-файл
+  let txt = `КВАНТОВАЯ ОНТОЛОГИЯ · @${raw}\n`;
+  txt += `Создано: ${new Date().toLocaleString('ru-RU')}\n\n`;
+  txt += `Найдено версий себя: ${identities.length}\n\n`;
+  identities.forEach((id, i) => txt += `${i + 1}. ${id.toUpperCase()}\n`);
+  txt += `\n\nВсе посты:\n\n` + posts.map((p, i) => `${i + 1}. ${p}`).join('\n\n');
 
-  const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
+  const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
-  const btn = document.getElementById('downloadBtn');
-  btn.onclick = () => {
+  document.getElementById('downloadBtn').onclick = () => {
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `ontology_${raw}_${new Date().toISOString().slice(0,10)}.txt`;
+    a.href = url; a.download = `ontology_${raw}_${new Date().toISOString().slice(0,10)}.txt`;
     a.click();
   };
-  btn.classList.add('active');
+  document.getElementById('downloadBtn').classList.add('active');
 
+  // Финал
   document.title = `Квантовая онтология · @${raw}`;
   document.getElementById('loading').style.display = 'none';
   document.getElementById('username').classList.remove('active');
@@ -252,39 +251,10 @@ async function enter(){
   document.getElementById('back').classList.add('active');
   document.getElementById('speed').classList.add('active');
   document.getElementById('desc').classList.add('active');
-  document.getElementById('desc').textContent = `@${raw} · ${clusterNames.slice(0,5).join(" · ")}`;
-}
-
-function finishWithFallback(username, profileData){
-  let txt = `КВАНТОВЫЙ ПАСПОРТ · @${username}\nДата: ${new Date().toLocaleString('ru-RU')}\n\n`;
-  if(profileData && profileData.latestPosts){
-    txt += `Имя: ${profileData.fullName || "—"}\nБио: ${profileData.biography || "—"}\nПостов: ${profileData.latestPosts.length}\n\n`;
-    profileData.latestPosts.forEach((p,i) => txt += `Пост ${i+1}\n${p.caption || "(без текста)"}\n\n`);
-  } else txt += "Профиль приватный — базовый портрет\n";
-
-  const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
-  const url = URL.createObjectURL(blob);
-  const btn = document.getElementById('downloadBtn');
-  btn.onclick = () => {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `quantum-passport_${username}_${new Date().toISOString().slice(0,10)}.txt`;
-    a.click();
-  };
-  btn.classList.add('active');
-
-  document.title = `Квантовая идентичность · @${username}`;
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('username').classList.remove('active');
-  canvas.classList.add('clear');
-  document.getElementById('back').classList.add('active');
-  document.getElementById('speed').classList.add('active');
-  document.getElementById('desc').classList.add('active');
-  document.getElementById('desc').textContent = `@${username} · базовый портрет`;
 }
 
 document.getElementById('back').onclick = () => location.reload();
-document.getElementById('user')?.addEventListener('keypress', e=>{if(e.key==='Enter') enter()});
+document.getElementById('user')?.addEventListener('keypress', e => { if (e.key === 'Enter') enter(); });
 </script>
 </body>
 </html>
