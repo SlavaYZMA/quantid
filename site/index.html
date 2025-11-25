@@ -5,11 +5,11 @@
 <title>Квантовая идентичность · Влада Садик</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2"></script>
 <script src="https://cdn.jsdelivr.net/npm/ml-kmeans@6.0.0/dist/index.min.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body,html{height:100%;overflow:hidden;background:#000;font-family:'IBM Plex Mono',monospace;color:#0ff}
+  body,html{height:100%;overflow:hidden;background:#000;font-family:'IBM Plex Mono',monospace}
   canvas{position:fixed;inset:0;z-index:1;transition:filter 1.8s ease;filter:brightness(0.38) blur(4px)}
   canvas.clear{filter:none}
   .intro{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:40px;opacity:0;visibility:hidden;transition:opacity 1.6s ease}
@@ -24,24 +24,38 @@
   .back.active{display:block}
   .speed{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:20;color:#fff;font-size:17px;background:rgba(0,0,0,0.7);padding:8px 24px;display:none}
   .speed.active{display:block}
-  .terminal{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#0ff;font-size:14px;line-height:1.6;background:rgba(0,0,0,0.8);padding:20px;overflow:hidden;height:140px;display:none;border:1px solid #033}
-  .terminal.active{display:block}
-  .terminal::before{content:"QCD-LOG ▶";display:block;margin-bottom:8px;opacity:0.7}
-  .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#0ff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #0ff;display:none}
-  .download-btn{position:fixed;bottom:170px;left:50%;transform:translateX(-50%);background:#0ff;color:#000;padding:16px 36px;font-size:17px;letter-spacing:3px;cursor:pointer;z-index:30;border:2px solid #0ff;border-radius:8px;font-weight:600;display:none}
+  .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none}
+  .desc.active{display:block}
+  .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none}
+  .download-btn{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none}
   .download-btn.active{display:block}
+
+  /* ← НОВЫЙ ТЕРМИНАЛ → */
+  .terminal{
+    position:fixed;bottom:24px;right:24px;z-index:25;width:420px;max-height:60vh;
+    background:#000;border:1px solid #fff;padding:12px;font-size:13px;line-height:1.6;
+    color:#0f0;overflow-y:auto;display:none;opacity:0;transition:all 0.6s ease;
+    box-shadow:0 0 30px rgba(0,255,0,0.3);
+  }
+  .terminal.active{display:block;opacity:1;}
+  .terminal-toggle{
+    position:fixed;bottom:24px;right:24px;z-index:26;background:rgba(0,255,0,0.15);
+    color:#0f8;padding:8px 14px;font-size:12px;cursor:pointer;border:1px solid #0f8;
+    display:none;
+  }
+  .terminal-toggle.active{display:block;}
 </style>
 </head>
 <body>
 
 <canvas id="c"></canvas>
-<div class="loading" id="loading">инициализация вакуума...</div>
+<div class="loading" id="loading">Читаю Instagram @<span id="loaduser"></span>…</div>
 
 <div class="intro active" id="welcome">
   <div>
     <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
     <div class="year">2025—2026 · Влада Садик</div>
-    <p>Твоя личность — это не список ролей.<br>Это живая квантовая пена, где каждое "я" — квазичастица с массой, зарядом и судьбой.</p>
+    <p>Идентичность — это не «я есть», это суперпозиция всех возможных «я».<br>Проект коллапсирует её в живую QCD-пену из твоих данных.</p>
     <button onclick="showUsername()">НАЧАТЬ</button>
   </div>
 </div>
@@ -51,14 +65,18 @@
     <h1>ВВЕДИ СВОЙ INSTAGRAM</h1>
     <p>Только публичный профиль · ничего не сохраняется</p>
     <input type="text" id="user" placeholder="@username" autocomplete="off">
-    <button onclick="enter()">ЗАПУСТИТЬ СИМУЛЯЦИЮ</button>
+    <button onclick="enter()">ЗАПУСТИТЬ</button>
   </div>
 </div>
 
 <div class="back" id="back">← назад</div>
 <div class="speed" id="speed">скор ×1.00</div>
-<div class="terminal" id="terminal">инициализация вакуума...</div>
-<div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВУЮ ОНТОЛОГИЮ (TXT)</div>
+<div class="desc" id="desc">загрузка...</div>
+<div class="download-btn" id="downloadBtn">СКАЧАТЬ ОНТОЛОГИЮ (TXT)</div>
+
+<!-- ТЕРМИНАЛ -->
+<div class="terminal-toggle" id="terminalToggle">ТЕРМИНАЛ ▶</div>
+<div class="terminal" id="terminal"></div>
 
 <script>
 const APIFY_TOKEN = "apify_api_XFk4W4rmvDDfnSxhsYzkUbHnHPdJ0R1I2wyz";
@@ -73,25 +91,27 @@ const field = new Float32Array(size*size*size);
 let t = 0;
 let speed = 1.0;
 
-// ← БАЗОВЫЕ КЛАСТЕРЫ (всегда есть, пока не заменятся реальными)
 let clusters = [
-  {name:"творец", weight:5, coherence:0.7, freq:0.03, phase:0, charge:1},
-  {name:"мама", weight:4, coherence:0.65, freq:0.038, phase:0.6, charge:-0.6},
-  {name:"дочь", weight:3, coherence:0.9, freq:0.02, phase:0, charge:0.9},
-  {name:"тревожная", weight:6, coherence:0.5, freq:0.055, phase:Math.PI, charge:-1},
-  {name:"куратор", weight:5, coherence:0.8, freq:0.034, phase:0.3, charge:1},
-  {name:"тело", weight:3, coherence:0.6, freq:0.05, phase:1.1, charge:-0.4},
-  {name:"постчеловек", weight:4, coherence:0.75, freq:0.045, phase:0.9, charge:1},
-  {name:"наблюдатель", weight:4, coherence:0.95, freq:0.018, phase:0, charge:0.6}
+  {name:"творец", weight:1, coherence:0.7, freq:0.03, phase:0, charge:1},
+  {name:"мама", weight:1, coherence:0.7, freq:0.04, phase:0.5, charge:-0.5},
+  {name:"дочь", weight:1, coherence:0.9, freq:0.02, phase:0, charge:0.8},
+  {name:"тревожная", weight:1, coherence:0.5, freq:0.06, phase:Math.PI, charge:-1},
+  {name:"куратор", weight:1, coherence:0.8, freq:0.035, phase:0.2, charge:1},
+  {name:"тело", weight:1, coherence:0.6, freq:0.05, phase:1.2, charge:-0.3},
+  {name:"постчеловек", weight:1, coherence:0.75, freq:0.045, phase:0.8, charge:1},
+  {name:"наблюдатель", weight:1, coherence:0.95, freq:0.015, phase:0, charge:0.5}
 ];
 
-const logElement = document.getElementById('terminal');
-let logLines = ["вакуум стабилен — ожидаем наблюдателя"];
+let prevEnergy = clusters.map(()=>0);
+const log = [];
 
-function log(msg){
-  logLines.push(`t=${(t).toFixed(2)} ▶ ${msg}`);
-  if(logLines.length > 6) logLines.shift();
-  logElement.innerHTML = "<div style='opacity:0.7'>QCD-LOG ▶</div>" + logLines.map(l=>`<div>${l}</div>`).join('');
+function logEvent(msg){
+  const line = `[t=${t.toFixed(1)}] ${msg}`;
+  log.push(line);
+  if(log.length > 200) log.shift();
+  const term = document.getElementById('terminal');
+  if(term) term.innerHTML = log.join('<br>') + '<br>';
+  term.scrollTop = term.scrollHeight;
 }
 
 document.addEventListener('wheel', e=>{
@@ -100,78 +120,82 @@ document.addEventListener('wheel', e=>{
 });
 
 function createCluster(){
-  const total = clusters.reduce((s,c)=>s + c.weight * c.coherence, 0) || 1;
+  const total = clusters.reduce((s,c)=>s + c.weight * c.coherence, 0);
   let r = Math.random() * total;
-  let chosen = clusters[0];
+  let chosen;
   for(const c of clusters){
     r -= c.weight * c.coherence;
     if(r <= 0){ chosen = c; break; }
   }
+  if(!chosen) chosen = clusters[0];
 
   const x0 = Math.random()*size, y0 = Math.random()*size, z0 = Math.random()*size;
-  const rho = 4 + chosen.coherence * 12;
-  const amp = chosen.weight * (1.4 + Math.random()*1.3);
+  const rho = 4 + chosen.coherence * 10;
+  const amplitude = chosen.weight * (1.4 + Math.random()*1.2);
 
-  for(let dx=-22;dx<22;dx++)for(let dy=-22;dy<22;dy++)for(let dz=-22;dz<22;dz++){
-    const x = Math.floor(x0+dx), y = Math.floor(y0+dy), z = Math.floor(z0+dz);
+  let added = false;
+  for(let dx=-18;dx<18;dx++)for(let dy=-18;dy<18;dy++)for(let dz=-18;dz<18;dz++){
+    const x=Math.floor(x0+dx), y=Math.floor(y0+dy), z=Math.floor(z0+dz);
     if(x<0||x>=size||y<0||y>=size||z<0||z>=size) continue;
-    const d = Math.hypot(dx,dy,dz);
+    const d=Math.hypot(dx,dy,dz);
     if(d < rho*1.8){
-      const wave = Math.cos(t * chosen.freq * speed + chosen.phase);
-      field[z*size*size + y*size + x] += amp * Math.exp(-d*d/(rho*rho)) * wave * chosen.charge;
+      const wave = Math.cos(t * chosen.freq * speed + chosen.phase + d*0.1);
+      field[z*size*size + y*size + x] += amplitude * Math.exp(-d*d/(rho*rho)) * wave * chosen.charge;
+      added = true;
     }
   }
+  if(added && Math.random()<0.15) logEvent(`"${chosen.name}" рождает инстантон`);
 }
 
-for(let i=0;i<70;i++) createCluster();
+for(let i=0;i<50;i++) createCluster();
 
 setInterval(()=>{
   t += 0.018 * speed;
   const decay = Math.pow(0.996, speed);
   for(let i=0;i<field.length;i++) field[i] *= decay;
-  if(Math.random() < 0.22 * speed) createCluster();
+  if(Math.random() < 0.18 * speed) createCluster();
 
-  // Реальная энергия кластеров
-  const energy = new Array(clusters.length).fill(0);
+  const energy = clusters.map(()=>0);
   for(let i=0;i<field.length;i++){
     const v = field[i];
     const a = Math.abs(v);
-    if(a > 0.3){
-      let best = 0, score = 0;
+    if(a > 0.35){
+      let best = 0, bestScore = 0;
       for(let c=0; c<clusters.length; c++){
         const expected = Math.cos(t * clusters[c].freq * speed + clusters[c].phase);
-        const s = a * (v * expected > 0 ? 1 : 0.15);
-        if(s > score){ score = s; best = c; }
+        const score = a * (v > 0 === expected > 0 ? 1 : 0.1);
+        if(score > bestScore){ bestScore = score; best = c; }
       }
       energy[best] += a;
     }
   }
-  const sum = Math.max(energy.reduce((a,b)=>a+b,0), 0.001);
-  const perc = energy.map(e=>e/sum*100);
+  const sumE = energy.reduce((a,b)=>a+b, 0.0001);
+  const perc = energy.map(e=>e/sumE*100);
 
-  // Живой лог
-  if(Math.random() < 0.35){
-    const top = perc.indexOf(Math.max(...perc));
-    const low = perc.indexOf(Math.min(...perc));
-    if(perc[top] > 48) log(`${clusters[top].name.toUpperCase()} доминирует (${perc[top].toFixed(0)}%)`);
-    else if(perc[low] < 6) log(`${clusters[low].name} почти поглощена — энергия ${perc[low].toFixed(1)}%`);
-    else if(clusters[top].charge < 0) log(`деструктивная интерференция — пурпурные волны гасят всё`);
-    else log(`${clusters[top].name} расширяется — амплитуда +${(perc[top]-30).toFixed(0)}%`);
+  // ← ЛОГИКА СОБЫТИЙ →
+  for(let i=0;i<clusters.length;i++){
+    const delta = perc[i] - prevEnergy[i];
+    if(delta > 8) logEvent(`"${clusters[i].name}" доминирует ↑ ${perc[i].toFixed(1)}%`);
+    if(delta < -8) logEvent(`"${clusters[i].name}" подавляется ↓ ${perc[i].toFixed(1)}%`);
+    if(perc[i] > 40) logEvent(`"${clusters[i].name}" захватывает вакуум`);
   }
+  prevEnergy = perc;
 
-  // Рисуем — всё как ты любишь
-  ctx.fillStyle = '#000008';
+  document.getElementById('desc').textContent = 
+    clusters.map((c,i)=>`${c.name} ${perc[i].toFixed(1)}%`).slice(0,6).join(" · ");
+
+  ctx.fillStyle='#000008';
   ctx.fillRect(0,0,canvas.width,canvas.height);
-  const sx = canvas.width/size, sy = canvas.height/size;
+  const sx=canvas.width/size, sy=canvas.height/size;
   for(let y=0;y<size;y++)for(let x=0;x<size;x++){
-    let sum = 0;
-    for(let z=0;z<size;z++) sum += field[z*size*size + y*size + x];
-    const q = sum/size;
-    if(Math.abs(q) > 0.011){
-      const hue = q > 0 ? 188 : 298;
-      const intensity = Math.min(Math.abs(q)*11, 1);
-      ctx.fillStyle = `hsla(${hue},100%,${58+intensity*37}%,${intensity})`;
-      ctx.fillRect(x*sx, y*sy, sx+1, sy+1);
+    let sum=0;
+    for(let z=0;z<size;z++) sum+=field[z*size*size+y*size+x];
+    const q=sum/size;
+    if(Math.abs(q)>0.011){
+      const hue=q>0?188:298;
+      const i=Math.min(Math.abs(q)*11,1);
+      ctx.fillStyle=`hsla(${hue},100%,${58+i*37}%,${i})`;
+      ctx.fillRect(x*sx,y*sy,sx+1,sy+1);
     }
   }
 },16);
@@ -196,7 +220,6 @@ async function enter(){
 
   document.getElementById('loaduser').textContent = raw;
   document.getElementById('loading').style.display = 'block';
-  document.getElementById('downloadBtn').classList.remove('active');
 
   let sentences = [];
   try {
@@ -212,17 +235,12 @@ async function enter(){
     }
   }catch(e){}
 
-  if(sentences.length === 0){
-    log("профиль приватный — остаёмся в базовом вакууме");
-    document.getElementById('loading').style.display='none';
-    canvas.classList.add('clear');
-    document.getElementById('back').classList.add('active');
-    document.getElementById('speed').classList.add('active');
-    document.getElementById('terminal').classList.add('active');
+  if(sentences.length===0){
+    finishWithFallback(raw);
     return;
   }
 
-  document.getElementById('loading').innerHTML = "Строю твою онтологию…";
+  document.getElementById('loading').innerHTML = "Построение онтологии…";
 
   try{
     const m = await getModel();
@@ -232,7 +250,7 @@ async function enter(){
       embeds.push(Array.from(o.data));
     }
 
-    const k = Math.max(5, Math.min(14, Math.ceil(sentences.length/2.5)));
+    const k = Math.max(5, Math.min(14, Math.ceil(sentences.length/3)));
     const {clusters:labels} = kmeans(embeds, k);
 
     const newClusters = [];
@@ -240,36 +258,35 @@ async function enter(){
       const idxs = labels.map((l,j)=>l===i?j:-1).filter(x=>x>=0);
       const texts = idxs.map(j=>sentences[j]);
       const words = texts.join(" ").toLowerCase().replace(/[^а-яa-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>3);
-      const freq = {}; words.forEach(w=>freq[w]=(freq[w]||0)+1);
-      const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]).join(" ") || "неизвестная";
+      const freq = {};
+      words.forEach(w=>freq[w]=(freq[w]||0)+1);
+      const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]).join(" ") || "тайна";
 
-      let coh = 0.85;
+      let coh = 0.9;
       if(idxs.length>1){
-        let distSum = 0;
-        for(let a=0;a<idxs.length;a++)for(let b=a+1;b<idxs.length;b++){
-          distSum += Math.sqrt(embeds[idxs[a]].reduce((s,v,j)=>s+(v-embeds[idxs[b]][j])**2,0));
+        let dists = 0;
+        const vecs = idxs.map(j=>embeds[j]);
+        for(let a=0;a<vecs.length;a++)for(let b=a+1;b<vecs.length;b++){
+          dists += Math.sqrt(vecs[a].reduce((s,v,j)=>s+(v-vecs[b][j])**2,0));
         }
-        coh = Math.max(0.4, 1 - distSum/(idxs.length*(idxs.length-1)));
+        coh = Math.max(0.3, 1 - dists/(vecs.length*(vecs.length-1)/2));
       }
 
       newClusters.push({
         name: top,
         weight: texts.length,
         coherence: coh,
-        freq: 0.018 + Math.random()*0.042,
+        freq: 0.02 + Math.random()*0.04,
         phase: Math.random()*Math.PI*2,
-        charge: Math.random() > 0.5 ? 1 : -1
+        charge: Math.random()>0.5 ? 1 : -1
       });
     }
-    clusters = newClusters;
-    log(`онтология готова — ${clusters.length} живых "я" в вакууме`);
-  }catch(e){
-    log("ИИ не загрузился — остаёмся в базовом режиме");
-  }
+    clusters = newClusters.length ? newClusters : clusters;
+  }catch(e){}
 
-  // TXT
+  // TXT и финал
   let txt = `КВАНТОВАЯ ОНТОЛОГИЯ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\n`;
-  clusters.forEach((c,i)=>txt+=`${i+1}. ${c.name.toUpperCase()} (вес ${c.weight}, когерентность ${c.coherence.toFixed(2)})\n`);
+  clusters.forEach((c,i)=>txt+=`${i+1}. ${c.name.toUpperCase()}\n`);
   txt += `\n\nПосты:\n` + sentences.map((s,i)=>`${i+1}. ${s}`).join('\n');
 
   const blob = new Blob([txt],{type:"text/plain;charset=utf-8"});
@@ -283,9 +300,28 @@ async function enter(){
   canvas.classList.add('clear');
   document.getElementById('back').classList.add('active');
   document.getElementById('speed').classList.add('active');
-  document.getElementById('terminal').classList.add('active');
-  log(`@ ${raw} вошла в вакуум — наблюдение началось`);
+  document.getElementById('desc').classList.add('active');
+  document.getElementById('terminalToggle').classList.add('active');
+  document.getElementById('desc').textContent = `@${raw} · ${clusters.slice(0,5).map(c=>c.name).join(" · ")}`;
 }
+
+function finishWithFallback(u){
+  document.getElementById('loading').style.display='none';
+  document.getElementById('username').classList.remove('active');
+  canvas.classList.add('clear');
+  document.getElementById('back').classList.add('active');
+  document.getElementById('speed').classList.add('active');
+  document.getElementById('desc').classList.add('active');
+  document.getElementById('desc').textContent = `@${u} · базовый портрет`;
+}
+
+// ТЕРМИНАЛ
+document.getElementById('terminalToggle').onclick = () => {
+  const term = document.getElementById('terminal');
+  const tog = document.getElementById('terminalToggle');
+  term.classList.toggle('active');
+  tog.textContent = term.classList.contains('active') ? "ТЕРМИНАЛ ▼" : "ТЕРМИНАЛ ▶";
+};
 
 document.getElementById('back').onclick = () => location.reload();
 document.getElementById('user')?.addEventListener('keypress',e=>{if(e.key==='Enter')enter()});
