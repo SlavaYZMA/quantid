@@ -122,21 +122,6 @@ setInterval(()=>{
   for(let i=0;i<field.length;i++) field[i] *= decay;
   if(Math.random() < 0.16 * speed) createCluster();
 
-  const power=new Array(roleWeights.length).fill(0);
-  let Q=0, bright=0;
-  for(let i=0;i<field.length;i++){
-    const v=field[i]; Q+=v;
-    const a=Math.abs(v);
-    if(a>0.45) bright++;
-    power[Math.floor(Math.random()*roleWeights.length)] += a*0.15;
-  }
-  const sum=power.reduce((a,b)=>a+b)||1;
-  const perc = power.map(p=>p/sum*100);
-
-  let txt = bright<10 ? "чистый вакуум" :
-            clusterNames.slice(0,5).map((n,i)=>`${n} ${perc[i].toFixed(0)}%`).join(" · ");
-  document.getElementById('desc').textContent = txt;
-
   ctx.fillStyle='#000008';
   ctx.fillRect(0,0,canvas.width,canvas.height);
   const sx=canvas.width/size, sy=canvas.height/size;
@@ -151,6 +136,12 @@ setInterval(()=>{
       ctx.fillRect(x*sx,y*sy,sx+1,sy+1);
     }
   }
+
+  const power=new Array(roleWeights.length).fill(0);
+  for(let i=0;i<field.length;i++) power[Math.floor(Math.random()*roleWeights.length)] += Math.abs(field[i])*0.001;
+  const sum=power.reduce((a,b)=>a+b)||1;
+  const perc = power.map(p=>p/sum*100);
+  document.getElementById('desc').textContent = clusterNames.slice(0,5).map((n,i)=>`${n} ${perc[i].toFixed(0)}%`).join(" · ");
 },16);
 
 function showUsername(){
@@ -162,8 +153,8 @@ function showUsername(){
 let model = null;
 async function getModel(){
   if(model) return model;
-  document.getElementById('loading').textContent = "Загружаю ИИ-мозг… (80 Мб, один раз)";
-  model = await Xenova.pipeline('feature-ex-extraction', 'Xenova/all-MiniLM-L6-v2');
+  document.getElementById('loading').innerHTML = "Загружаю ИИ-мозг…<br>(80 Мб, один раз)";
+  model = await Xenova.pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
   return model;
 }
 
@@ -188,9 +179,9 @@ async function enter(){
 
     if (Array.isArray(data) && data[0]) {
       profileData = data[0];
-      const bio = profileData.biography || "";
+      const bio = (profileData.biography || "").trim();
       const posts = profileData.latestPosts || [];
-      if(bio.trim()) sentences.push(bio.trim());
+      if(bio) sentences.push(bio);
       posts.forEach(p => { if(p.caption && p.caption.trim()) sentences.push(p.caption.trim()); });
     }
   } catch(e) {
@@ -202,7 +193,7 @@ async function enter(){
     return;
   }
 
-  document.getElementById('loading').textContent = "Анализирую твою онтологию…";
+  document.getElementById('loading').innerHTML = "Анализирую твою онтологию…";
 
   try {
     const model = await getModel();
@@ -212,15 +203,16 @@ async function enter(){
       embeddings.push(Array.from(out.data));
     }
 
-    let bestK = Math.max(5, Math.min(12, Math.floor(embeddings.length/3)));
-    const { clusters } = kmeans(embeddings, bestK);
+    const k = Math.max(5, Math.min(12, Math.ceil(embeddings.length / 3)));
+    const { clusters } = kmeans(embeddings, k);
 
-    const clusterTexts = Array(bestK).fill().map(()=>[]);
+    const clusterTexts = Array.from({length: k}, ()=>[]);
     sentences.forEach((s,i)=> clusterTexts[clusters[i]].push(s));
 
     clusterNames = [];
     roleWeights = [];
     for(const texts of clusterTexts){
+      if(texts.length === 0) continue;
       const words = texts.join(" ").toLowerCase()
         .replace(/[^а-яa-z0-9\s]/g,' ')
         .split(/\s+/).filter(w=>w.length>3);
@@ -230,20 +222,17 @@ async function enter(){
       clusterNames.push(top.length ? top.join(" ") : "тайна");
       roleWeights.push(texts.length);
     }
-    const sumW = roleWeights.reduce((a,b)=>a+b,0);
-    roleWeights = roleWeights.map(w => w/sumW * 12);
+    const sumW = roleWeights.reduce((a,b)=>a+b,1);
+    roleWeights = roleWeights.map(w => w/sumW * 15);
 
   } catch(e) {
-    console.log("ИИ не загрузился — используем базовые роли");
+    console.log("ИИ не загрузился — используем базовые роли", e);
   }
 
-  // TXT с онтологией
-  let txt = `КВАНТОВАЯ ОНТОЛОГИЯ · @${raw}\nДата: ${new Date().toLocaleString('ru-RU')}\n\n`;
-  txt += `Найдено версий себя: ${clusterNames.length}\n\n`;
-  clusterNames.forEach((name,i) => {
-    txt += `${i+1}. ${name.toUpperCase()} (${roleWeights[i].toFixed(1)})\n`;
-  });
-  txt += `\n\nИсходные тексты:\n` + sentences.map((s,i)=>`${i+1}. ${s}`).join('\n');
+  // TXT
+  let txt = `КВАНТОВАЯ ОНТОЛОГИЯ · @${raw}\nДата: ${new Date().toLocaleString('ru-RU')}\n\nВерсий себя: ${clusterNames.length}\n\n`;
+  clusterNames.forEach((n,i)=> txt += `${i+1}. ${n.toUpperCase()}\n`);
+  txt += `\n\nПосты:\n` + sentences.map((s,i)=>`${i+1}. ${s}`).join('\n');
 
   const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
   const url = URL.createObjectURL(blob);
@@ -268,14 +257,11 @@ async function enter(){
 
 function finishWithFallback(username, profileData){
   let txt = `КВАНТОВЫЙ ПАСПОРТ · @${username}\nДата: ${new Date().toLocaleString('ru-RU')}\n\n`;
-  if (profileData) {
-    txt += `Имя: ${profileData.fullName || "—"}\nБио: ${profileData.biography || "—"}\nПостов: ${(profileData.latestPosts || []).length}\n\n`;
-    (profileData.latestPosts || []).forEach((p,i) => {
-      txt += `Пост ${i+1}\n${p.caption || "(без текста)"}\nЛайков: ${p.likesCount || 0}\n\n`;
-    });
-  } else {
-    txt += "Профиль приватный — портрет на базовых ролях\n";
-  }
+  if(profileData && profileData.latestPosts){
+    txt += `Имя: ${profileData.fullName || "—"}\nБио: ${profileData.biography || "—"}\nПостов: ${profileData.latestPosts.length}\n\n`;
+    profileData.latestPosts.forEach((p,i) => txt += `Пост ${i+1}\n${p.caption || "(без текста)"}\n\n`);
+  } else txt += "Профиль приватный — базовый портрет\n";
+
   const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   const btn = document.getElementById('downloadBtn');
@@ -293,7 +279,7 @@ function finishWithFallback(username, profileData){
   canvas.classList.add('clear');
   document.getElementById('back').classList.add('active');
   document.getElementById('speed').classList.add('active');
-  document.getElementBy Sainte.add('active');
+  document.getElementById('desc').classList.add('active');
   document.getElementById('desc').textContent = `@${username} · базовый портрет`;
 }
 
