@@ -26,6 +26,13 @@
   .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none}
   .desc.active{display:block}
   .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none}
+  .download-btn{
+    position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+    background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;
+    cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none;
+  }
+  .download-btn.active{display:block}
 </style>
 </head>
 <body>
@@ -33,7 +40,6 @@
 <canvas id="c"></canvas>
 <div class="loading" id="loading">Читаю Instagram @<span id="loaduser"></span>…</div>
 
-<!-- Слой 1 -->
 <div class="intro active" id="welcome">
   <div>
     <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
@@ -44,7 +50,6 @@
   </div>
 </div>
 
-<!-- Слой 2 -->
 <div class="intro" id="username">
   <div>
     <h1>ВВЕДИ СВОЙ INSTAGRAM</h1>
@@ -57,9 +62,9 @@
 <div class="back" id="back">← назад</div>
 <div class="speed" id="speed">скор ×1.00</div>
 <div class="desc" id="desc">загрузка...</div>
+<div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ (TXT)</div>
 
 <script>
-// ТВОЙ РАБОЧИЙ APIFY ТОКЕН
 const APIFY_TOKEN = "apify_api_XFk4W4rmvDDfnSxhsYzkUbHnHPdJ0R1I2wyz";
 
 const canvas = document.getElementById('c');
@@ -152,6 +157,9 @@ async function enter(){
   
   document.getElementById('loaduser').textContent = raw;
   document.getElementById('loading').style.display = 'block';
+  document.getElementById('downloadBtn').classList.remove('active');
+
+  let profileData = null;
 
   try {
     const res = await fetch("https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token="+APIFY_TOKEN, {
@@ -161,9 +169,11 @@ async function enter(){
     });
     const data = await res.json();
 
-    if(data && data[0] && data[0].latestPosts){
-      const text = (data[0].bio || "") + " " + data[0].latestPosts.map(p=>p.caption||"").join(" ").toLowerCase();
+    if(data && data[0]){
+      profileData = data[0];
 
+      // Персонализация пены
+      const text = (profileData.bio || "") + " " + profileData.latestPosts.map(p=>p.caption||"").join(" ").toLowerCase();
       const keywords = [
         ["арт","творчеств","худож","картин","выставк","куратор"],
         ["мама","дети","ребён","сын","доч"],
@@ -174,14 +184,38 @@ async function enter(){
         ["постчеловек","киборг","ai","нейросет","трансгуман"],
         ["наблюда","квантов","сознани","медитац","духовн"]
       ];
-
       keywords.forEach((words,i)=>{
         if(words.some(w=>text.includes(w))) roleWeights[i] *= 3.2;
       });
     }
   } catch(e) {
-    console.log("Apify недоступен — используем базовые веса");
+    console.log("Instagram временно недоступен — используем базовый портрет");
   }
+
+  // === ФОРМИРУЕМ И СКАЧИВАЕМ TXT ===
+  const username = raw;
+  let txtContent = `КВАНТОВЫЙ ПАСПОРТ · @${username}\n`;
+  txtContent += `Дата создания: ${new Date().toLocaleString('ru-RU')}\n\n`;
+
+  if(profileData){
+    txtContent += `Имя: ${profileData.fullName || "—"} \nБио: ${profileData.bio || "—"}\nПостов проанализировано: ${profileData.latestPosts.length}\n\n`;
+    profileData.latestPosts.forEach((p,i)=>{
+      txtContent += `Пост ${i+1}\n${p.caption || "(без текста)"}\nЛайков: ${p.likesCount}   Комментов: ${p.commentsCount}\n\n`;
+    });
+  } else {
+    txtContent += "Instagram временно недоступен — портрет создан на базовых весах\n";
+  }
+
+  const blob = new Blob([txtContent], {type: "text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const btn = document.getElementById('downloadBtn');
+  btn.onclick = () => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `quantum-passport_${username}_${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
+  };
+  btn.classList.add('active');
 
   document.title = `Квантовая идентичность · @${raw}`;
   document.getElementById('loading').style.display = 'none';
@@ -190,6 +224,7 @@ async function enter(){
   document.getElementById('back').classList.add('active');
   document.getElementById('speed').classList.add('active');
   document.getElementById('desc').classList.add('active');
+  document.getElementById('desc').textContent = profileData ? `@${raw} · квантовый портрет готов` : `@${raw} · базовый портрет`;
 }
 
 document.getElementById('back').onclick = () => location.reload();
