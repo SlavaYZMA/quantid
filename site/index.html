@@ -2,93 +2,66 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>Квантовая идентичность</title>
+<title>Квантовая идентичность · Влада Садик</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body,html{height:100%;overflow:hidden;background:#000;font-family:'IBM Plex Mono',monospace}
-  canvas{
-    position:fixed;inset:0;z-index:1;
-    transition:filter 1.8s ease;
-    filter:brightness(0.38) blur(4px);
-  }
+  canvas{position:fixed;inset:0;z-index:1;transition:filter 1.8s ease;filter:brightness(0.38) blur(4px)}
   canvas.clear{filter:none}
-  .intro{
-    position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;
-    color:#fff;text-align:center;padding:40px;
-    opacity:0;visibility:hidden;transition:opacity 1.6s ease;
-  }
+  .intro{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:40px;opacity:0;visibility:hidden;transition:opacity 1.6s ease}
   .intro.active{opacity:1;visibility:visible}
   .intro h1{font-size:38px;font-weight:600;letter-spacing:6px;margin-bottom:16px}
   .intro .year{font-size:18px;margin-bottom:40px;opacity:0.9}
   .intro p{font-size:17px;line-height:1.8;max-width:720px;margin:28px auto}
-  .intro input{
-    background:transparent;border:none;border-bottom:1px solid #fff;color:#fff;
-    font-size:19px;padding:12px 0;width:320px;max-width:90%;text-align:center;
-    outline:none;margin:30px 0 40px
-  }
-  .intro button{
-    background:none;border:none;color:#fff;font-size:18px;letter-spacing:3px;
-    cursor:pointer;padding:10px 0;position:relative
-  }
-  .intro button::after{
-    content:'';position:absolute;left:0;right:0;bottom:0;height:1px;
-    background:#fff;transform:scaleX(0);transition:transform 0.4s ease;
-  }
+  .intro input{background:transparent;border:none;border-bottom:1px solid #fff;color:#fff;font-size:19px;padding:12px 0;width:320px;max-width:90%;text-align:center;outline:none;margin:30px 0 40px}
+  .intro button{background:none;border:none;color:#fff;font-size:18px;letter-spacing:3px;cursor:pointer;padding:10px 0;position:relative}
+  .intro button::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:#fff;transform:scaleX(0);transition:transform 0.4s ease}
   .intro button:hover::after{transform:scaleX(1)}
-  .back{
-    position:fixed;top:24px;left:24px;z-index:20;color:#fff;font-size:15px;
-    background:rgba(0,0,0,0.6);padding:8px 16px;cursor:pointer;display:none;
-    border-bottom:1px solid #fff;padding-bottom:4px
-  }
+  .back{position:fixed;top:24px;left:24px;z-index:20;color:#fff;font-size:15px;background:rgba(0,0,0,0.6);padding:8px 16px;cursor:pointer;display:none;border-bottom:1px solid #fff}
   .back.active{display:block}
-  .speed{
-    position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:20;
-    color:#fff;font-size:17px;background:rgba(0,0,0,0.7);padding:8px 24px;display:none
-  }
+  .speed{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:20;color:#fff;font-size:17px;background:rgba(0,0,0,0.7);padding:8px 24px;display:none}
   .speed.active{display:block}
-  .desc{
-    position:fixed;bottom:24px;left:24px;right:24px;z-index:20;
-    color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);
-    padding:20px;display:none
-  }
+  .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none}
   .desc.active{display:block}
+  .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none}
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
 
-<!-- Слой 1 — вступление -->
+<canvas id="c"></canvas>
+<div class="loading" id="loading">Читаю Instagram @<span id="loaduser"></span>…</div>
+
+<!-- Слой 1 -->
 <div class="intro active" id="welcome">
   <div>
     <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
-    <div class="year">2025—2026</div>
-    <p>Если рассмотреть идентичность человека как многослойную систему. На физическом уровне идентичность является волновой функцией в квантовом пространстве: до внешнего воздействия существует в суперпозиции всех возможных состояний "я", а при наблюдении коллапсирует в одно.<br>
-    Проект рассматривает идентичность как совокупность этих слоев: возможных состояний, автобиографической истории, социальной маски, биологической формы и культурного нарратива. Это позволяет показать, что "я" не едино, а множественно.
-</p>
-    <p>Проект создаёт твой автопортрет в реальном QCD-вакууме<br>на основе открытых данных Instagram Telegram Facebook X Threads.</p>
-    <button onclick="showUsername()">Начать</button>
+    <div class="year">2025—2026 · Влада Садик</div>
+    <p>Твоя личность — это не список ролей.<br>Это живая квантовая пена, где каждая мысль, страх, любовь и творчество — настоящий инстантон.</p>
+    <p>Проект создаёт твой автопортрет в реальном QCD-вакууме<br>на основе открытых данных Instagram.</p>
+    <button onclick="showUsername()">ВОЙТИ В СЕБЯ</button>
   </div>
 </div>
 
-<!-- Слой 2 — ввод username -->
+<!-- Слой 2 -->
 <div class="intro" id="username">
   <div>
-    <h1>ВВЕДИ СВОЙ username Instagram</h1>
-    <p>Только открытый профиль</p>
+    <h1>ВВЕДИ СВОЙ INSTAGRAM</h1>
+    <p>Только публичный профиль · ничего не сохраняется</p>
     <input type="text" id="user" placeholder="@username" autocomplete="off">
-    <button onclick="enter()">Запустить</button>
+    <button onclick="enter()">СОЗДАТЬ МОЙ АВТОПОРТРЕТ</button>
   </div>
 </div>
 
-<!-- Слой 3 — элементы симуляции -->
 <div class="back" id="back">← назад</div>
 <div class="speed" id="speed">скор ×1.00</div>
 <div class="desc" id="desc">загрузка...</div>
 
 <script>
-// === КВАНТОВАЯ СИМУЛЯЦИЯ (без изменений) ===
+// ТВОЙ РАБОЧИЙ APIFY ТОКЕН
+const APIFY_TOKEN = "apify_api_XFk4W4rmvDDfnSxhsYzkUbHnHPdJ0R1I2wyz";
+
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 canvas.width = innerWidth; canvas.height = innerHeight;
@@ -98,36 +71,24 @@ const size = 96;
 const field = new Float32Array(size*size*size);
 let t = 0;
 let speed = 1.0;
-const speedEl = document.getElementById('speed');
+let roleWeights = [0.30,0.23,0.16,0.40,0.19,0.14,0.22,0.27];
 
 document.addEventListener('wheel', e=>{
   speed = e.deltaY<0 ? Math.min(speed*1.4,100) : Math.max(speed/1.4,0.01);
-  speedEl.textContent = `скор ×${speed.toFixed(2)}`;
+  document.getElementById('speed').textContent = `скор ×${speed.toFixed(2)}`;
 });
 document.addEventListener('keydown', e=>{
   if(e.key==="ArrowRight") speed = Math.min(speed*2,100);
   if(e.key==="ArrowLeft") speed = Math.max(speed/2,0.01);
-  speedEl.textContent = `скор ×${speed.toFixed(2)}`;
+  document.getElementById('speed').textContent = `скор ×${speed.toFixed(2)}`;
 });
 
-const roles = [
-  {n:"художница-творец", w:0.30},
-  {n:"мама", w:0.23},
-  {n:"дочь", w:0.16},
-  {n:"тревожная", w:0.40},
-  {n:"куратор", w:0.19},
-  {n:"тело", w:0.14},
-  {n:"постчеловек", w:0.22},
-  {n:"наблюдатель", w:0.27}
-];
-
 for(let i=0;i<40;i++) createCluster();
-
 function createCluster(){
   const x0=Math.random()*size, y0=Math.random()*size, z0=Math.random()*size;
   const rho=5+Math.random()*9;
-  const r=Math.floor(Math.pow(Math.random(),0.75)*roles.length);
-  const s=roles[r].w*(1.6+Math.random()*0.8);
+  const r=Math.floor(Math.pow(Math.random(),0.75)*8);
+  const s=roleWeights[r]*(1.6+Math.random()*0.8);
   const phase=r===3?Math.PI:Math.random()*1.5;
   for(let dx=-rho*2|0;dx<rho*2;dx++)for(let dy=-rho*2|0;dy<rho*2;dy++)for(let dz=-rho*2|0;dz<rho*2;dz++){
     const x=Math.floor(x0+dx),y=Math.floor(y0+dy),z=Math.floor(z0+dz);
@@ -153,12 +114,14 @@ setInterval(()=>{
     power[Math.floor(Math.random()*8)] += a*0.15;
   }
   const sum=power.reduce((a,b)=>a+b)||1;
-  roles.forEach((r,i)=> r.p = (power[i]/sum*100).toFixed(1));
+  const perc = power.map(p=>p/sum*100);
 
   let txt = bright<10 ? "чистый вакуум" :
+            perc[3]>42 ? `тревожная ${perc[3].toFixed(1)}%` :
+            perc[0]>38 ? `творец ${perc[0].toFixed(1)}%` :
             Q<-1.2 ? `Q ${Q.toFixed(2)} — тревога` :
             Q>1.4 ? `Q ${Q.toFixed(2)} — цельность` :
-            `тревожная ${roles[3].p}% · творец ${roles[0].p}%`;
+            `тревожная ${perc[3].toFixed(1)}% · творец ${perc[0].toFixed(1)}%`;
   document.getElementById('desc').textContent = txt;
 
   ctx.fillStyle='#000008';
@@ -177,58 +140,56 @@ setInterval(()=>{
   }
 },16);
 
-// === ПЕРЕХОДЫ + ПАРСИНГ С ТВОЕГО ЖИВОГО БЭКЕНДА ===
 function showUsername(){
   document.getElementById('welcome').classList.remove('active');
   document.getElementById('username').classList.add('active');
   setTimeout(()=>document.getElementById('user').focus(),300);
 }
 
-function enter(){
-  const u = document.getElementById('user').value.trim().replace(/^@/,'') || '';
-  if (!u) {
-    alert("Введи настоящий Instagram-username");
-    return;
+async function enter(){
+  const raw = document.getElementById('user').value.trim().replace(/^@/,'');
+  if(!raw){ alert("Введи username"); return; }
+  
+  document.getElementById('loaduser').textContent = raw;
+  document.getElementById('loading').style.display = 'block';
+
+  try {
+    const res = await fetch("https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token="+APIFY_TOKEN, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({usernames:[raw], resultsLimit:20})
+    });
+    const data = await res.json();
+
+    if(data && data[0] && data[0].latestPosts){
+      const text = (data[0].bio || "") + " " + data[0].latestPosts.map(p=>p.caption||"").join(" ").toLowerCase();
+
+      const keywords = [
+        ["арт","творчеств","худож","картин","выставк","куратор"],
+        ["мама","дети","ребён","сын","доч"],
+        ["доч","папа","мама","родител"],
+        ["тревог","страх","паник","нерв","боюс","депрес"],
+        ["куратор","биеннал","галере","арт-пространств"],
+        ["тело","йога","спорт","боль","здоровь"],
+        ["постчеловек","киборг","ai","нейросет","трансгуман"],
+        ["наблюда","квантов","сознани","медитац","духовн"]
+      ];
+
+      keywords.forEach((words,i)=>{
+        if(words.some(w=>text.includes(w))) roleWeights[i] *= 3.2;
+      });
+    }
+  } catch(e) {
+    console.log("Apify недоступен — используем базовые веса");
   }
 
-  document.title = `Квантовая идентичность · @${u}`;
+  document.title = `Квантовая идентичность · @${raw}`;
+  document.getElementById('loading').style.display = 'none';
   document.getElementById('username').classList.remove('active');
   canvas.classList.add('clear');
   document.getElementById('back').classList.add('active');
   document.getElementById('speed').classList.add('active');
   document.getElementById('desc').classList.add('active');
-  document.getElementById('desc').textContent = `сканирую Instagram @${u}… 15–40 сек`;
-
-  fetch(`https://quantid-backend-production.up.railway.app/parse?u=${u}`)
-    .then(r => r.json())
-    .then(res => {
-      if (res.status === "success") {
-        document.getElementById('desc').textContent = 
-          `@${u} · ${res.data.captions.length} постов · квантовый паспорт готов`;
-
-        const oldBtn = document.getElementById('download-btn');
-        if (oldBtn) oldBtn.remove();
-
-        const btn = document.createElement('div');
-        btn.id = 'download-btn';
-        btn.innerHTML = 'СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ (TXT)';
-        btn.style.cssText = `
-          position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
-          background:rgba(255,255,255,0.96); color:#000; padding:20px 40px; font-size:20px;
-          cursor:pointer; z-index:30; letter-spacing:3px; font-weight:600;
-          border:2px solid #fff; border-radius:8px;
-          box-shadow:0 15px 50px rgba(0,0,0,0.7);
-        `;
-        btn.onclick = () => window.open(res.download_url, '_blank');
-        document.body.appendChild(btn);
-
-      } else {
-        document.getElementById('desc').textContent = "профиль приватный или Instagram временно недоступен";
-      }
-    })
-    .catch(err => {
-      document.getElementById('desc').textContent = "сервер просыпается — подожди 15–20 сек и попробуй снова";
-    });
 }
 
 document.getElementById('back').onclick = () => location.reload();
