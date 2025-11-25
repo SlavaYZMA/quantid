@@ -28,12 +28,7 @@
   .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none}
   .desc.active{display:block}
   .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none}
-  .download-btn{
-    position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
-    background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;
-    cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;
-    box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none;
-  }
+  .download-btn{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none}
   .download-btn.active{display:block}
 </style>
 </head>
@@ -46,9 +41,7 @@
   <div>
     <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
     <div class="year">2025—2026 · Влада Садик</div>
-    <p>Если рассмотреть идентичность человека как многослойную систему. На физическом уровне идентичность является волновой функцией в квантовом пространстве: до внешнего воздействия существует в суперпозиции всех возможных состояний "я", а при наблюдении коллапсирует в одно. 
-<br>Проект рассматривает идентичность как совокупность этих слоев: возможных состояний, автобиографической истории, социальной маски, биологической формы и культурного нарратива. Это позволяет показать, что "я" не едино, а множественно.</p>
-    <p>Проект создаёт твой автопортрет в реальном QCD-вакууме<br>на основе открытых данных Instagram.</p>
+    <p>Если рассмотреть идентичность человека как многослойную систему. На физическом уровне идентичность является волновой функцией в квантовом пространстве: до внешнего воздействия существует в суперпозиции всех возможных состояний "я", а при наблюдении коллапсирует в одно.<br>Проект создаёт твой автопортрет в реальном QCD-вакууме на основе открытых данных Instagram.</p>
     <button onclick="showUsername()">НАЧАТЬ</button>
   </div>
 </div>
@@ -68,7 +61,6 @@
 <div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВУЮ ОНТОЛОГИЮ (TXT)</div>
 
 <script>
-// ТВОЙ ТОКЕН
 const APIFY_TOKEN = "apify_api_XFk4W4rmvDDfnSxhsYzkUbHnHPdJ0R1I2wyz";
 
 const canvas = document.getElementById('c');
@@ -80,8 +72,18 @@ const size = 96;
 const field = new Float32Array(size*size*size);
 let t = 0;
 let speed = 1.0;
-let roleWeights = [0.30,0.23,0.16,0.40,0.19,0.14,0.22,0.27];
-let clusterNames = ["творец","мама","дочь","тревожная","куратор","тело","постчеловек","наблюдатель"];
+
+// ←←← ЭТО ТЕПЕРЬ ЖИВЫЕ КЛАСТЕРЫ ←←←
+let clusters = [
+  {name:"творец", weight:1, coherence:0.7, freq:0.03, phase:0, charge:1},
+  {name:"мама", weight:1, coherence:0.7, freq:0.04, phase:0.5, charge:-0.5},
+  {name:"дочь", weight:1, coherence:0.9, freq:0.02, phase:0, charge:0.8},
+  {name:"тревожная", weight:1, coherence:0.5, freq:0.06, phase:Math.PI, charge:-1},
+  {name:"куратор", weight:1, coherence:0.8, freq:0.035, phase:0.2, charge:1},
+  {name:"тело", weight:1, coherence:0.6, freq:0.05, phase:1.2, charge:-0.3},
+  {name:"постчеловек", weight:1, coherence:0.75, freq:0.045, phase:0.8, charge:1},
+  {name:"наблюдатель", weight:1, coherence:0.95, freq:0.015, phase:0, charge:0.5}
+];
 
 document.addEventListener('wheel', e=>{
   speed = e.deltaY<0 ? Math.min(speed*1.4,100) : Math.max(speed/1.4,0.01);
@@ -93,35 +95,63 @@ document.addEventListener('keydown', e=>{
   document.getElementById('speed').textContent = `скор ×${speed.toFixed(2)}`;
 });
 
-for(let i=0;i<40;i++) createCluster();
 function createCluster(){
-  const x0=Math.random()*size, y0=Math.random()*size, z0=Math.random()*size;
-  const rho=5+Math.random()*9;
-  const totalWeight = roleWeights.reduce((a,b)=>a+b,0);
-  let rand = Math.random() * totalWeight;
-  let r = 0;
-  for(; r<roleWeights.length; r++){
-    rand -= roleWeights[r];
-    if(rand <= 0) break;
+  const total = clusters.reduce((s,c)=>s + c.weight * c.coherence, 0);
+  let r = Math.random() * total;
+  let chosen;
+  for(const c of clusters){
+    r -= c.weight * c.coherence;
+    if(r <= 0){ chosen = c; break; }
   }
-  if(r >= roleWeights.length) r = roleWeights.length-1;
-  
-  const s=roleWeights[r]*(1.6+Math.random()*0.8);
-  const phase = Math.random()*Math.PI*2;
-  for(let dx=-rho*2|0;dx<rho*2;dx++)for(let dy=-rho*2|0;dy<rho*2;dy++)for(let dz=-rho*2|0;dz<rho*2;dz++){
-    const x=Math.floor(x0+dx),y=Math.floor(y0+dy),z=Math.floor(z0+dz);
+  if(!chosen) chosen = clusters[0];
+
+  const x0 = Math.random()*size, y0 = Math.random()*size, z0 = Math.random()*size;
+  const rho = 4 + chosen.coherence * 10; // более когерентный = крупнее
+  const amplitude = chosen.weight * (1.4 + Math.random()*1.2);
+
+  for(let dx=-18;dx<18;dx++)for(let dy=-18;dy<18;dy++)for(let dz=-18;dz<18;dz++){
+    const x=Math.floor(x0+dx), y=Math.floor(y0+dy), z=Math.floor(z0+dz);
     if(x<0||x>=size||y<0||y>=size||z<0||z>=size) continue;
     const d=Math.hypot(dx,dy,dz);
-    if(d<rho*1.8) field[z*size*size+y*size+x] += s*Math.exp(-d*d/(rho*rho))*Math.cos(t*0.03+phase);
+    if(d < rho*1.8){
+      const wave = Math.cos(t * chosen.freq * speed + chosen.phase + d*0.1);
+      field[z*size*size + y*size + x] += amplitude * Math.exp(-d*d/(rho*rho)) * wave * chosen.charge;
+    }
   }
 }
+
+// начальное заполнение
+for(let i=0;i<50;i++) createCluster();
 
 setInterval(()=>{
   t += 0.018 * speed;
   const decay = Math.pow(0.996, speed);
   for(let i=0;i<field.length;i++) field[i] *= decay;
-  if(Math.random() < 0.16 * speed) createCluster();
+  if(Math.random() < 0.18 * speed) createCluster();
 
+  // ←←← СЧИТАЕМ РЕАЛЬНУЮ ЭНЕРГИЮ КАЖДОГО КЛАСТЕРА ←←←
+  const energy = clusters.map(()=>0);
+  for(let i=0;i<field.length;i++){
+    const v = field[i];
+    const a = Math.abs(v);
+    if(a > 0.3){
+      // определяем, какой кластер доминирует в этой точке по фазе и частоте
+      let best = 0, bestScore = 0;
+      for(let c=0; c<clusters.length; c++){
+        const expected = Math.cos(t * clusters[c].freq * speed + clusters[c].phase);
+        const score = a * (v > 0 === expected > 0 ? 1 : 0.1);
+        if(score > bestScore){ bestScore = score; best = c; }
+      }
+      energy[best] += a;
+    }
+  }
+  const sumE = energy.reduce((a,b)=>a+b, 0.0001);
+  const perc = energy.map(e=>e/sumE*100);
+
+  document.getElementById('desc').textContent = 
+    clusters.map((c,i)=>`${c.name} ${perc[i].toFixed(1)}%`).slice(0,6).join(" · ");
+
+  // ←←← РИСУЕМ ТОЧНО ТАК ЖЕ, КАК ТЫ ЛЮБИШЬ ←←←
   ctx.fillStyle='#000008';
   ctx.fillRect(0,0,canvas.width,canvas.height);
   const sx=canvas.width/size, sy=canvas.height/size;
@@ -136,12 +166,6 @@ setInterval(()=>{
       ctx.fillRect(x*sx,y*sy,sx+1,sy+1);
     }
   }
-
-  const power=new Array(roleWeights.length).fill(0);
-  for(let i=0;i<field.length;i++) power[Math.floor(Math.random()*roleWeights.length)] += Math.abs(field[i])*0.001;
-  const sum=power.reduce((a,b)=>a+b)||1;
-  const perc = power.map(p=>p/sum*100);
-  document.getElementById('desc').textContent = clusterNames.slice(0,5).map((n,i)=>`${n} ${perc[i].toFixed(0)}%`).join(" · ");
 },16);
 
 function showUsername(){
@@ -160,131 +184,109 @@ async function getModel(){
 
 async function enter(){
   const raw = document.getElementById('user').value.trim().replace(/^@/,'');
-  if(!raw){ alert("Введи username"); return; }
-  
+  if(!raw) return alert("Введи username");
+
   document.getElementById('loaduser').textContent = raw;
   document.getElementById('loading').style.display = 'block';
   document.getElementById('downloadBtn').classList.remove('active');
 
-  let profileData = null;
   let sentences = [];
-
   try {
     const res = await fetch("https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token="+APIFY_TOKEN, {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ usernames: [raw], resultsLimit: 30 })
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({usernames:[raw], resultsLimit:40})
     });
     const data = await res.json();
-
-    if (Array.isArray(data) && data[0]) {
-      profileData = data[0];
-      const bio = (profileData.biography || "").trim();
-      const posts = profileData.latestPosts || [];
+    if(data[0]){
+      const bio = (data[0].biography||"").trim();
       if(bio) sentences.push(bio);
-      posts.forEach(p => { if(p.caption && p.caption.trim()) sentences.push(p.caption.trim()); });
+      (data[0].latestPosts||[]).forEach(p=>p.caption&&p.caption.trim()&&sentences.push(p.caption.trim()));
     }
-  } catch(e) {
-    console.log("Instagram недоступен");
-  }
+  }catch(e){}
 
-  if(sentences.length === 0){
-    finishWithFallback(raw, profileData);
+  if(sentences.length===0){
+    finishWithFallback(raw);
     return;
   }
 
   document.getElementById('loading').innerHTML = "Анализирую твою онтологию…";
 
-  try {
-    const model = await getModel();
-    const embeddings = [];
-    for(const sent of sentences){
-      const out = await model(sent, { pooling: 'mean', normalize: true });
-      embeddings.push(Array.from(out.data));
+  try{
+    const m = await getModel();
+    const embeds = [];
+    for(const s of sentences){
+      const o = await m(s, {pooling:'mean', normalize:true});
+      embeds.push(Array.from(o.data));
     }
 
-    const k = Math.max(5, Math.min(12, Math.ceil(embeddings.length / 3)));
-    const { clusters } = kmeans(embeddings, k);
+    const k = Math.max(5, Math.min(14, Math.ceil(sentences.length/3)));
+    const {clusters:labels} = kmeans(embeds, k);
 
-    const clusterTexts = Array.from({length: k}, ()=>[]);
-    sentences.forEach((s,i)=> clusterTexts[clusters[i]].push(s));
-
-    clusterNames = [];
-    roleWeights = [];
-    for(const texts of clusterTexts){
-      if(texts.length === 0) continue;
-      const words = texts.join(" ").toLowerCase()
-        .replace(/[^а-яa-z0-9\s]/g,' ')
-        .split(/\s+/).filter(w=>w.length>3);
+    // строим новые живые кластеры
+    const newClusters = [];
+    for(let i=0;i<k;i++){
+      const idxs = labels.map((l,j)=>l===i?j:-1).filter(x=>x>=0);
+      const texts = idxs.map(j=>sentences[j]);
+      const words = texts.join(" ").toLowerCase().replace(/[^а-яa-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>3);
       const freq = {};
-      words.forEach(w=> freq[w] = (freq[w]||0)+1);
-      const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]);
-      clusterNames.push(top.length ? top.join(" ") : "тайна");
-      roleWeights.push(texts.length);
-    }
-    const sumW = roleWeights.reduce((a,b)=>a+b,1);
-    roleWeights = roleWeights.map(w => w/sumW * 15);
+      words.forEach(w=>freq[w]=(freq[w]||0)+1);
+      const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]).join(" ") || "тайна";
 
-  } catch(e) {
-    console.log("ИИ не загрузился — используем базовые роли", e);
-  }
+      // когерентность кластера
+      const vecs = idxs.map(j=>embeds[j]);
+      let coh = 0.9;
+      if(vecs.length>1){
+        let dists = 0;
+        for(let a=0;a<vecs.length;a++)for(let b=a+1;b<vecs.length;b++){
+          dists += Math.sqrt(vecs[a].reduce((s,v,j)=>s+(v-vecs[b][j])**2,0));
+        }
+        coh = Math.max(0.3, 1 - dists/(vecs.length*(vecs.length-1)/2));
+      }
+
+      newClusters.push({
+        name: top,
+        weight: texts.length,
+        coherence: coh,
+        freq: 0.02 + Math.random()*0.04,
+        phase: Math.random()*Math.PI*2,
+        charge: Math.random()>0.5 ? 1 : -1
+      });
+    }
+    clusters = newClusters.length ? newClusters : clusters; // fallback
+  }catch(e){console.log("ИИ не сработал, используем базовые")}
 
   // TXT
-  let txt = `КВАНТОВАЯ ОНТОЛОГИЯ · @${raw}\nДата: ${new Date().toLocaleString('ru-RU')}\n\nВерсий себя: ${clusterNames.length}\n\n`;
-  clusterNames.forEach((n,i)=> txt += `${i+1}. ${n.toUpperCase()}\n`);
+  let txt = `КВАНТОВАЯ ОНТОЛОГИЯ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\n`;
+  clusters.forEach((c,i)=>txt+=`${i+1}. ${c.name.toUpperCase()}\n`);
   txt += `\n\nПосты:\n` + sentences.map((s,i)=>`${i+1}. ${s}`).join('\n');
 
-  const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
+  const blob = new Blob([txt],{type:"text/plain;charset=utf-8"});
   const url = URL.createObjectURL(blob);
-  const btn = document.getElementById('downloadBtn');
-  btn.onclick = () => {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `ontology_${raw}_${new Date().toISOString().slice(0,10)}.txt`;
-    a.click();
-  };
-  btn.classList.add('active');
+  document.getElementById('downloadBtn').onclick = ()=>{const a=document.createElement('a');a.href=url;a.download=`ontology_${raw}_${new Date().toISOString().slice(0,10)}.txt`;a.click();};
+  document.getElementById('downloadBtn').classList.add('active');
 
   document.title = `Квантовая онтология · @${raw}`;
-  document.getElementById('loading').style.display = 'none';
+  document.getElementById('loading').style.display='none';
   document.getElementById('username').classList.remove('active');
   canvas.classList.add('clear');
   document.getElementById('back').classList.add('active');
   document.getElementById('speed').classList.add('active');
   document.getElementById('desc').classList.add('active');
-  document.getElementById('desc').textContent = `@${raw} · ${clusterNames.slice(0,5).join(" · ")}`;
+  document.getElementById('desc').textContent = `@${raw} · ${clusters.slice(0,5).map(c=>c.name).join(" · ")}`;
 }
 
-function finishWithFallback(username, profileData){
-  let txt = `КВАНТОВЫЙ ПАСПОРТ · @${username}\nДата: ${new Date().toLocaleString('ru-RU')}\n\n`;
-  if(profileData && profileData.latestPosts){
-    txt += `Имя: ${profileData.fullName || "—"}\nБио: ${profileData.biography || "—"}\nПостов: ${profileData.latestPosts.length}\n\n`;
-    profileData.latestPosts.forEach((p,i) => txt += `Пост ${i+1}\n${p.caption || "(без текста)"}\n\n`);
-  } else txt += "Профиль приватный — базовый портрет\n";
-
-  const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
-  const url = URL.createObjectURL(blob);
-  const btn = document.getElementById('downloadBtn');
-  btn.onclick = () => {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `quantum-passport_${username}_${new Date().toISOString().slice(0,10)}.txt`;
-    a.click();
-  };
-  btn.classList.add('active');
-
-  document.title = `Квантовая идентичность · @${username}`;
-  document.getElementById('loading').style.display = 'none';
+function finishWithFallback(u){
+  document.getElementById('loading').style.display='none';
   document.getElementById('username').classList.remove('active');
   canvas.classList.add('clear');
   document.getElementById('back').classList.add('active');
   document.getElementById('speed').classList.add('active');
   document.getElementById('desc').classList.add('active');
-  document.getElementById('desc').textContent = `@${username} · базовый портрет`;
+  document.getElementById('desc').textContent = `@${u} · базовый портрет`;
 }
 
 document.getElementById('back').onclick = () => location.reload();
-document.getElementById('user')?.addEventListener('keypress', e=>{if(e.key==='Enter') enter()});
+document.getElementById('user')?.addEventListener('keypress',e=>{if(e.key==='Enter')enter()});
 </script>
 </body>
 </html>
