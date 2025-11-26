@@ -14,7 +14,7 @@
   .intro.active{opacity:1;visibility:visible}
   .intro h1{font-size:38px;font-weight:600;letter-spacing:6px;margin-bottom:16px}
   .intro p{font-size:17px;line-height:1.8;max-width:720px;margin:28px auto}
-  .intro input{background:transparent;border:none;border-bottom:1px solid #fff;color:#fff;font-size:19px;padding:12px 0;width:320px;max-width:90%;text-align:center;outline:none;margin: none;margin:30px 0 40px}
+  .intro input{background:transparent;border:none;border-bottom:1px solid #fff;color:#fff;font-size:19px;padding:12px 0;width:320px;max-width:90%;text-align:center;outline:none;margin:30px 0 40px}
   .intro button{background:none;border:none;color:#fff;font-size:18px;letter-spacing:3px;cursor:pointer;padding:10px 0;position:relative}
   .intro button::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:#fff;transform:scaleX(0);transition:transform 0.4s ease}
   .intro button:hover::after{transform:scaleX(1)}
@@ -24,7 +24,7 @@
   .speed.active{display:block}
   .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none;word-spacing:4px}
   .desc.active{display:block}
-  .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none;line-height:1.6;text-align:c}
+  .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none;line-height:1.6;text-align:center}
   .download-btn{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none}
   .download-btn.active{display:block}
 </style>
@@ -32,7 +32,7 @@
 <body>
 
 <canvas id="c"></canvas>
-<div class="loading" id="loading">ИИ входит в тебя...<br>5–15 секунд</div>
+<div class="loading" id="loading">ИИ входит в тебя...<br>8–15 секунд</div>
 
 <div class="intro active" id="welcome">
   <div>
@@ -54,10 +54,11 @@
 
 <div class="back" id="back">← назад</div>
 <div class="speed" id="speed">скор ×1.00</div>
-<div class="desc active" id="desc">случайный вакуум</div>
+<div class="desc" id="desc">случайный вакуум</div>
 <div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ</div>
 
 <script>
+// === ТВОЙ РАБОЧИЙ СЕРВЕР ===
 const ONTOLOGY_SERVER = "https://slavayzma--quantum-ontology-fastapi-app.modal.run";
 
 const canvas = document.getElementById('c');
@@ -71,7 +72,7 @@ let t = 0;
 let speed = 1.0;
 let clusters = [];
 
-// Начальная рандомная пена
+// Начальная пена (до загрузки реального профиля)
 clusters = "ночной свет тень пульс эхо шёпот вспышка пустота".split(" ").map(name => ({name, weight: 0.8 + Math.random()*0.6}));
 for (let i = 0; i < 60; i++) setTimeout(() => createCluster(), i*30);
 
@@ -103,17 +104,19 @@ function weightedRandom(weights) {
   return weights.length-1;
 }
 
-// Живой текст внизу экрана
+// === КРАСИВЫЙ ЖИВОЙ ТЕКСТ С ПРОЦЕНТАМИ ===
 function updateDesc() {
   const descEl = document.getElementById('desc');
-  if (clusters.length <= 10) {
+  if (!clusters || clusters.length <= 10) {
     descEl.textContent = "случайный вакуум";
   } else {
     const total = clusters.reduce((s, c) => s + c.weight, 0);
-    const percentages = clusters.map(c => (c.weight / total * 100).toFixed(1) + '%');
-    descEl.textContent = 
-      clusters.slice(0, 8).map((c, i) => `${c.name} ${percentages[i]}`).join(" · ") +
-      (clusters.length > 8 ? " …" : "");
+    const top = clusters.slice(0, 8);
+    const lines = top.map(c => {
+      const percent = (c.weight / total * 100).toFixed(1);
+      return `${c.name} ${percent}%`;
+    });
+    descEl.textContent = lines.join(" · ") + (clusters.length > 8 ? " …" : "");
   }
   descEl.classList.add('active');
 }
@@ -124,7 +127,7 @@ setInterval(() => {
   for (let i=0;i<field.length;i++) field[i] *= decay;
   if (Math.random() < 0.16 * speed) createCluster();
 
-  updateDesc(); // ← теперь всегда актуально
+  updateDesc(); // ← каждый кадр — актуальный текст
 
   ctx.fillStyle = '#000008';
   ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -142,12 +145,12 @@ setInterval(() => {
   }
 }, 16);
 
+// === ЗАПУСК ОНТОЛОГИИ ===
 async function enter() {
   const raw = document.getElementById('user')?.value.trim().replace(/^@/,'');
   if (!raw) return alert("Введи username");
 
   document.getElementById('loading').style.display = 'block';
-  document.getElementById('loading').innerHTML = "ИИ читает твою душу...<br>8–15 секунд";
 
   let result;
   try {
@@ -165,17 +168,16 @@ async function enter() {
 
   if (result.error || !result.clusters) {
     document.getElementById('desc').textContent = "приватный профиль · базовая онтология";
+    document.getElementById('desc').classList.add('active');
     document.getElementById('downloadBtn').classList.remove('active');
     return;
   }
 
+  // ← НАСТОЯЩИЕ КЛАСТЕРЫ ИЗ ТВОЕЙ ДУШИ
   clusters = result.clusters.sort((a,b) => b.weight - a.weight);
+  updateDesc(); // ← сразу видно!
 
-  // ← ВОТ ЭТА СТРОЧКА — ГЛАВНАЯ ПОБЕДА СЕГОДНЯ
-  document.getElementById('desc').classList.remove('active');
-
-  updateDesc(); // ← теперь текст точно обновится
-
+  // паспорт
   let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\nОнтология: ${clusters.length} версий себя\n\n`;
   clusters.forEach((c,i) => txt += `${i+1}. ${c.name} (вес ${c.weight})\n`);
   const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
@@ -207,4 +209,3 @@ document.addEventListener('wheel', e => {
 </script>
 </body>
 </html>
-
