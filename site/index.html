@@ -24,7 +24,7 @@
   .speed.active{display:block}
   .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none;word-spacing:4px}
   .desc.active{display:block}
-  .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none;line-height:1.6;text-align:center}
+  .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none;line-height:1.6;text-align:c}
   .download-btn{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none}
   .download-btn.active{display:block}
 </style>
@@ -170,7 +170,11 @@ async function enter() {
   }
 
   clusters = result.clusters.sort((a,b) => b.weight - a.weight);
-  updateDesc(); // ← сразу показываем настоящие идентичности
+
+  // ← ВОТ ЭТА СТРОЧКА — ГЛАВНАЯ ПОБЕДА СЕГОДНЯ
+  document.getElementById('desc').classList.remove('active');
+
+  updateDesc(); // ← теперь текст точно обновится
 
   let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\nОнтология: ${clusters.length} версий себя\n\n`;
   clusters.forEach((c,i) => txt += `${i+1}. ${c.name} (вес ${c.weight})\n`);
@@ -203,3 +207,4 @@ document.addEventListener('wheel', e => {
 </script>
 </body>
 </html>
+
