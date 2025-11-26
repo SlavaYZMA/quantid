@@ -22,7 +22,7 @@
   .back.active{display:block}
   .speed{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:20;color:#fff;font-size:17px;background:rgba(0,0,0,0.7);padding:8px 24px;display:none}
   .speed.active{display:block}
-  .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none;word-spacing:4px}
+  .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none}
   .desc.active{display:block}
   .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none;line-height:1.6;text-align:center}
   .download-btn{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none}
@@ -32,7 +32,7 @@
 <body>
 
 <canvas id="c"></canvas>
-<div class="loading" id="loading">ИИ входит в тебя...<br>8–15 секунд</div>
+<div class="loading" id="loading">ИИ входит в тебя...<br>8–20 секунд</div>
 
 <div class="intro active" id="welcome">
   <div>
@@ -54,11 +54,11 @@
 
 <div class="back" id="back">← назад</div>
 <div class="speed" id="speed">скор ×1.00</div>
-<div class="desc" id="desc">случайный вакуум</div>
+<div class="desc" id="desc">анализ личности...</div>
 <div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ</div>
 
 <script>
-// === ТВОЙ РАБОЧИЙ СЕРВЕР ===
+// ← ТВОЯ АКТУАЛЬНАЯ РАБОЧАЯ ССЫЛКА (после последнего деплоя)
 const ONTOLOGY_SERVER = "https://slavayzma--quantum-ontology-ontology.modal.run";
 
 const canvas = document.getElementById('c');
@@ -72,7 +72,7 @@ let t = 0;
 let speed = 1.0;
 let clusters = [];
 
-// Начальная пена (до загрузки реального профиля)
+// Начальная пена
 clusters = "ночной свет тень пульс эхо шёпот вспышка пустота".split(" ").map(name => ({name, weight: 0.8 + Math.random()*0.6}));
 for (let i = 0; i < 60; i++) setTimeout(() => createCluster(), i*30);
 
@@ -97,25 +97,19 @@ function createCluster() {
 function weightedRandom(weights) {
   const sum = weights.reduce((a,b)=>a+b,0);
   let r = Math.random()*sum;
-  for (let i=0;i<weights.length;i++) { 
-    r -= weights[i]; 
-    if (r <= 0) return i; 
-  }
+  for (let i=0;i<weights.length;i++) { r -= weights[i]; if (r <= 0) return i; }
   return weights.length-1;
 }
 
-// === КРАСИВЫЙ ЖИВОЙ ТЕКСТ С ПРОЦЕНТАМИ ===
+// ← ГЛАВНОЕ ИСПРАВЛЕНИЕ: теперь кластеры ВСЕГДА видны!
 function updateDesc() {
   const descEl = document.getElementById('desc');
-  if (!clusters || clusters.length <= 10) {
-    descEl.textContent = "случайный вакуум";
+  if (!clusters || clusters.length === 0) {
+    descEl.textContent = "анализ личности...";
   } else {
     const total = clusters.reduce((s, c) => s + c.weight, 0);
     const top = clusters.slice(0, 8);
-    const lines = top.map(c => {
-      const percent = (c.weight / total * 100).toFixed(1);
-      return `${c.name} ${percent}%`;
-    });
+    const lines = top.map(c => `${c.name} ${(c.weight / total * 100).toFixed(1)}%`);
     descEl.textContent = lines.join(" · ") + (clusters.length > 8 ? " …" : "");
   }
   descEl.classList.add('active');
@@ -126,8 +120,7 @@ setInterval(() => {
   const decay = Math.pow(0.996, speed);
   for (let i=0;i<field.length;i++) field[i] *= decay;
   if (Math.random() < 0.16 * speed) createCluster();
-
-  updateDesc(); // ← каждый кадр — актуальный текст
+  updateDesc(); // ← каждый кадр — живые проценты
 
   ctx.fillStyle = '#000008';
   ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -145,7 +138,6 @@ setInterval(() => {
   }
 }, 16);
 
-// === ЗАПУСК ОНТОЛОГИИ ===
 async function enter() {
   const raw = document.getElementById('user')?.value.trim().replace(/^@/,'');
   if (!raw) return alert("Введи username");
@@ -173,9 +165,8 @@ async function enter() {
     return;
   }
 
-  // ← НАСТОЯЩИЕ КЛАСТЕРЫ ИЗ ТВОЕЙ ДУШИ
   clusters = result.clusters.sort((a,b) => b.weight - a.weight);
-  updateDesc(); // ← сразу видно!
+  updateDesc(); // ← сразу видно на экране!
 
   // паспорт
   let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\nОнтология: ${clusters.length} версий себя\n\n`;
@@ -209,5 +200,3 @@ document.addEventListener('wheel', e => {
 </script>
 </body>
 </html>
-
-
