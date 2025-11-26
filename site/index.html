@@ -32,13 +32,13 @@
 <body>
 
 <canvas id="c"></canvas>
-<div class="loading" id="loading">Загружаю твою онтологию...</div>
+<div class="loading" id="loading">ИИ входит в тебя...<br>5–15 секунд</div>
 
 <div class="intro active" id="welcome">
   <div>
     <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
     <div class="year">2025—2026 · Влада Садик</div>
-    <p>Твоя личность — не список ролей.<br>Это живая квантовая пена из настоящих версий тебя.</p>
+    <p>Твоя личность — не список ролей. Это живая квантовая пена, где каждая мысль, страх, любовь и творчество — настоящий инстантон.</p>
     <button onclick="showUsername()">НАЧАТЬ</button>
   </div>
 </div>
@@ -46,7 +46,7 @@
 <div class="intro" id="username">
   <div>
     <h1>ВВЕДИ СВОЙ INSTAGRAM</h1>
-    <p>Только публичный профиль</p>
+    <p>Только публичный профиль · ничего не сохраняется</p>
     <input type="text" id="user" placeholder="@username" autocomplete="off">
     <button onclick="enter()">ЗАПУСТИТЬ</button>
   </div>
@@ -58,6 +58,9 @@
 <div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ</div>
 
 <script>
+// === ТВОЙ СЕРВЕР (работает вечно!) ===
+const ONTOLOGY_SERVER = "https://slavayzma--quantum-ontology-ontology.modal.run";
+
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 canvas.width = innerWidth; canvas.height = innerHeight;
@@ -69,67 +72,53 @@ let t = 0;
 let speed = 1.0;
 let clusters = [];
 
-// Случайная пена на старте
-clusters = "ночь свет тень пульс эхо шёпот вспышка пустота тишина".split(" ").map(n => ({name: n, weight: 0.7 + Math.random()*0.6}));
-for(let i=0; i<60; i++) setTimeout(createCluster, i*40);
-
-document.addEventListener('wheel', e => {
-  speed = e.deltaY < 0 ? Math.min(speed*1.4, 100) : Math.max(speed/1.4, 0.01);
-  document.getElementById('speed').textContent = `скор ×${speed.toFixed(2)}`;
-});
-document.addEventListener('keydown', e => {
-  if(e.key==="ArrowRight") speed = Math.min(speed*2, 100);
-  if(e.key==="ArrowLeft") speed = Math.max(speed/2, 0.01);
-  document.getElementById('speed').textContent = `скор ×${speed.toFixed(2)}`;
-});
+// Начальная пена
+clusters = "ночной свет тень пульс эхо шёпот вспышка пустота".split(" ").map(name => ({name, weight: 0.8 + Math.random()*0.6}));
+for (let i = 0; i < 60; i++) setTimeout(() => createCluster(), i*30);
 
 function createCluster() {
-  if(clusters.length === 0) return;
+  if (clusters.length === 0) return;
   const x0 = Math.random()*size, y0 = Math.random()*size, z0 = Math.random()*size;
   const rho = 5 + Math.random()*9;
   const r = weightedRandom(clusters.map(c => c.weight));
   const s = clusters[r].weight * (1.6 + Math.random()*0.8);
   const phase = Math.random()*Math.PI*2;
 
-  for(let dx=-rho*2|0; dx<rho*2; dx++)
-  for(let dy=-rho*2|0; dy<rho*2; dy++)
-  for(let dz=-rho*2|0; dz<rho*2; dz++) {
+  for (let dx = -rho*2|0; dx < rho*2; dx++) 
+  for (let dy = -rho*2|0; dy < rho*2; dy++) 
+  for (let dz = -rho*2|0; dz < rho*2; dz++) {
     const x = Math.floor(x0+dx), y = Math.floor(y0+dy), z = Math.floor(z0+dz);
-    if(x<0||x>=size||y<0||y>=size||z<0||z>=size) continue;
+    if (x<0||x>=size||y<0||y>=size||z<0||z>=size) continue;
     const d = Math.hypot(dx,dy,dz);
-    if(d < rho*1.8)
-      field[z*size*size + y*size + x] += s * Math.exp(-d*d/(rho*rho)) * Math.cos(t*0.03 + phase);
+    if (d < rho*1.8) field[z*size*size + y*size + x] += s * Math.exp(-d*d/(rho*rho)) * Math.cos(t*0.03 + phase);
   }
 }
 
 function weightedRandom(weights) {
   const sum = weights.reduce((a,b)=>a+b,0);
   let r = Math.random()*sum;
-  for(let i=0;i<weights.length;i++) { r -= weights[i]; if(r<=0) return i; }
+  for (let i=0;i<weights.length;i++) { r64 -= weights[i]; if (r<=0) return i; }
   return weights.length-1;
 }
 
 setInterval(() => {
   t += 0.018 * speed;
   const decay = Math.pow(0.996, speed);
-  for(let i=0;i<field.length;i++) field[i] *= decay;
-  if(Math.random() < 0.16 * speed) createCluster();
+  for (let i=0;i<field.length;i++) field[i] *= decay;
+  if (Math.random() < 0.16 * speed) createCluster();
 
-  const txt = clusters.length <= 10
-    ? "случайный вакуум"
-    : `${clusters.length} версий себя: ${clusters.map(c=>c.name).slice(0,6).join(" · ")}${clusters.length > 6 ? "…" : ""}`;
+  const txt = clusters.length <= 10 ? "случайный вакуум" : `${clusters.length} версий себя: ${clusters.map(c=>c.name).slice(0,6).join(" · ")}…`;
   document.getElementById('desc').textContent = txt;
   document.getElementById('desc').classList.add('active');
 
   ctx.fillStyle = '#000008';
   ctx.fillRect(0,0,canvas.width,canvas.height);
   const sx = canvas.width/size, sy = canvas.height/size;
-  for(let y=0;y<size;y++)
-  for(let x=0;x<size;x++) {
+  for (let y=0;y<size;y++) for (let x=0;x<size;x++) {
     let sum = 0;
-    for(let z=0;z<size;z++) sum += field[z*size*size + y*size + x];
+    for (let z=0;z<size;z++) sum += field[z*size*size + y*size + x];
     const q = sum/size;
-    if(Math.abs(q)>0.011) {
+    if (Math.abs(q)>0.011) {
       const hue = q>0?188:298;
       const i = Math.min(Math.abs(q)*11,1);
       ctx.fillStyle = `hsla(${hue},100%,${58+i*37}%,${i})`;
@@ -138,40 +127,48 @@ setInterval(() => {
   }
 }, 16);
 
+// === НОВАЯ ФУНКЦИЯ ENTER (работает на твоём сервере) ===
 async function enter() {
-  const raw = document.getElementById('user').value.trim().replace(/^@/,'').toLowerCase();
-  if(!raw) return alert("Введи @username");
+  const raw = document.getElementById('user')?.value.trim().replace(/^@/,'');
+  if (!raw) return alert("Введи username");
 
   document.getElementById('loading').style.display = 'block';
-  document.getElementById('loading').innerHTML = "Ищу твою онтологию...";
+  document.getElementById('loading').innerHTML = "ИИ читает твою душу...<br>10–20 секунд";
 
+  let result;
   try {
-    const res = await fetch(`data/${raw}_ontology.json?t=${Date.now()}`);
-    if(!res.ok) throw new Error("Нет данных");
-    const data = await res.json();
-
-    clusters = data.clusters.map(c => ({
-      name: c.name,
-      weight: c.weight * 18
-    }));
-
-    document.getElementById('downloadBtn').onclick = () => {
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${raw}_quantum_passport.json`;
-      a.click();
-    };
-    document.getElementById('downloadBtn').classList.add('active');
-
-    document.title = `Квантовая идентичность · @${raw}`;
-    document.getElementById('desc').textContent = `${data.clusters_count} версий себя: ${clusters.map(c=>c.name).join(" · ")}`;
+    const resp = await fetch(ONTOLOGY_SERVER, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({username: raw})
+    });
+    result = await resp.json();
   } catch(e) {
-    document.getElementById('desc').textContent = "онтология не найдена · случайный вакуум";
+    result = {error: "сервер спит или профиль приватный"};
   }
 
   document.getElementById('loading').style.display = 'none';
+
+  if (result.error) {
+    document.getElementById('desc').textContent = "приватный профиль · базовая онтология";
+    document.getElementById('downloadBtn').classList.remove('active');
+    return;
+  }
+
+  // === ЗАГРУЖАЕМ НАСТОЯЩИЕ КЛАСТЕРЫ С СЕРВЕРА ===
+  clusters = result.clusters.sort((a,b) => b.weight - a.weight);
+
+  // TXT-паспорт
+  let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\nОнтология: ${clusters.length} версий себя\n\n`;
+  clusters.forEach((c,i) => txt += `${i+1}. ${c.name} (вес ${c.weight.toFixed(1)})\n`);
+  const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  document.getElementById('downloadBtn').onclick = () => {
+    const a = document.createElement('a'); a.href = url; a.download = `quantum-passport_${raw}_${new Date().toISOString().slice(0,10)}.txt`; a.click();
+  };
+  document.getElementById('downloadBtn').classList.add('active');
+
+  document.title = `Квантовая идентичность · @${raw}`;
   document.getElementById('username').classList.remove('active');
   canvas.classList.add('clear');
   document.getElementById('back').classList.add('active');
@@ -185,7 +182,11 @@ function showUsername() {
 }
 
 document.getElementById('back').onclick = () => location.reload();
-document.getElementById('user')?.addEventListener('keypress', e => { if(e.key==='Enter') enter(); });
+
+document.addEventListener('wheel', e => {
+  speed = e.deltaY < 0 ? Math.min(speed*1.4, 100) : Math.max(speed/1.4, 0.01);
+  document.getElementById('speed').textContent = `скор ×${speed.toFixed(2)}`;
+});
 </script>
 </body>
 </html>
