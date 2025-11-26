@@ -39,7 +39,7 @@
     <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
     <div class="year">2025—2026 · Влада Садик</div>
     <p>Твоя личность — не список ролей. Это живая квантовая пена, где каждая мысль, страх, любовь и творчество — настоящий инстантон.</p>
-    <button onclick="showUsername()">НАЧАТЬ</button>
+    <button type="button" onclick="showUsername()">НАЧАТЬ</button>
   </div>
 </div>
 
@@ -48,7 +48,7 @@
     <h1>ВВЕДИ СВОЙ INSTAGRAM</h1>
     <p>Только публичный профиль · ничего не сохраняется</p>
     <input type="text" id="user" placeholder="@username" autocomplete="off">
-    <button onclick="enter()">ЗАПУСТИТЬ</button>
+    <button type="button" onclick="enter()">ЗАПУСТИТЬ</button>
   </div>
 </div>
 
@@ -58,8 +58,8 @@
 <div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ</div>
 
 <script>
-// === ТВОЙ СЕРВЕР (работает вечно!) ===
-const ONTOLOGY_SERVER = "https://modal.com/apps/slavayzma/main/deployed/quantum-ontology";
+// === ТВОЯ НОВАЯ ССЫЛКА (уже работает!) ===
+const ONTOLOGY_SERVER = "https://slavayzma--quantum-ontology-fastapi-app.modal.run";
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
@@ -94,7 +94,6 @@ function createCluster() {
   }
 }
 
-// ИСПРАВЛЕНО: r64 → r
 function weightedRandom(weights) {
   const sum = weights.reduce((a,b)=>a+b,0);
   let r = Math.random()*sum;
@@ -136,7 +135,7 @@ async function enter() {
   if (!raw) return alert("Введи username");
 
   document.getElementById('loading').style.display = 'block';
-  document.getElementById('loading').innerHTML = "ИИ читает твою душу...<br>10–20 секунд";
+  document.getElementById('loading').innerHTML = "ИИ читает твою душу...<br>8–15 секунд";
 
   let result;
   try {
@@ -152,7 +151,7 @@ async function enter() {
 
   document.getElementById('loading').style.display = 'none';
 
-  if (result.error) {
+  if (result.error || !result.clusters) {
     document.getElementById('desc').textContent = "приватный профиль · базовая онтология";
     document.getElementById('downloadBtn').classList.remove('active');
     return;
@@ -161,7 +160,7 @@ async function enter() {
   clusters = result.clusters.sort((a,b) => b.weight - a.weight);
 
   let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\nОнтология: ${clusters.length} версий себя\n\n`;
-  clusters.forEach((c,i) => txt += `${i+1}. ${c.name} (вес ${c.weight.toFixed(1)})\n`);
+  clusters.forEach((c,i) => txt += `${i+1}. ${c.name} (вес ${c.weight})\n`);
   const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   document.getElementById('downloadBtn').onclick = () => {
@@ -191,4 +190,3 @@ document.addEventListener('wheel', e => {
 </script>
 </body>
 </html>
-
