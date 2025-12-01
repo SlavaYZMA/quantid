@@ -131,9 +131,6 @@ setInterval(() => {
 async function enter() {
   const raw = document.getElementById('user')?.value.trim().replace(/^@/,'');
   if (!raw) return alert("Введи username");
-
-  ");
-
   document.getElementById('loading').style.display = 'block';
 
   let result = null;
@@ -193,3 +190,4 @@ document.addEventListener('wheel', e => {
 </script>
 </body>
 </html>
+
