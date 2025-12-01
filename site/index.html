@@ -32,13 +32,13 @@
 <body>
 
 <canvas id="c"></canvas>
-<div class="loading" id="loading">Анализ личности...<br>10–25 секунд</div>
+<div class="loading" id="loading">ИИ входит в тебя...<br>8–20 секунд</div>
 
 <div class="intro active" id="welcome">
   <div>
     <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
     <div class="year">2025—2026 · Влада Садик</div>
-    <p>Твоя личность — это не одна роль, а 81 научный прототип, вычисленный из твоих постов.</p>
+    <p>Твоя личность — не список ролей. Это живая квантовая пена, где каждая мысль, страх, любовь и творчество — настоящий инстантон.</p>
     <button type="button" onclick="showUsername()">НАЧАТЬ</button>
   </div>
 </div>
@@ -54,12 +54,12 @@
 
 <div class="back" id="back">← назад</div>
 <div class="speed" id="speed">скор ×1.00</div>
-<div class="desc" id="desc">случайный вакуум</div>
+<div class="desc" id="desc">анализ личности...</div>
 <div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ</div>
 
 <script>
-// ТВОЯ ССЫЛКА
-const ONTOLOGY_SERVER = "https://slavayzma--quantum-ontology-v6-ontology.modal.run";
+// ← ТВОЯ АКТУАЛЬНАЯ РАБОЧАЯ ССЫЛКА (после последнего деплоя)
+const ONTOLOGY_SERVER = "https://slavayzma--quantum-ontology-ontology.modal.run";
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
@@ -72,16 +72,16 @@ let t = 0;
 let speed = 1.0;
 let clusters = [];
 
-// Случайная пена до загрузки
-clusters = "ночной свет тень пульс эхо шёпот вспышка пустота".split(" ").map(name => ({name_ru: name, percentage: 12.5}));
+// Начальная пена
+clusters = "ночной свет тень пульс эхо шёпот вспышка пустота".split(" ").map(name => ({name, weight: 0.8 + Math.random()*0.6}));
 for (let i = 0; i < 60; i++) setTimeout(() => createCluster(), i*30);
 
 function createCluster() {
   if (clusters.length === 0) return;
   const x0 = Math.random()*size, y0 = Math.random()*size, z0 = Math.random()*size;
   const rho = 5 + Math.random()*9;
-  const r = weightedRandom(clusters.map(c => c.percentage || c.weight || 1));
-  const s = 2.4;
+  const r = weightedRandom(clusters.map(c => c.weight));
+  const s = clusters[r].weight * (1.6 + Math.random()*0.8);
   const phase = Math.random()*Math.PI*2;
 
   for (let dx = -rho*2|0; dx < rho*2; dx++) 
@@ -101,13 +101,16 @@ function weightedRandom(weights) {
   return weights.length-1;
 }
 
+// ← ГЛАВНОЕ ИСПРАВЛЕНИЕ: теперь кластеры ВСЕГДА видны!
 function updateDesc() {
   const descEl = document.getElementById('desc');
   if (!clusters || clusters.length === 0) {
     descEl.textContent = "анализ личности...";
   } else {
-    const lines = clusters.map(c => `${c.name_ru} ${c.percentage}%`);
-    descEl.textContent = lines.join(" · ");
+    const total = clusters.reduce((s, c) => s + c.weight, 0);
+    const top = clusters.slice(0, 8);
+    const lines = top.map(c => `${c.name} ${(c.weight / total * 100).toFixed(1)}%`);
+    descEl.textContent = lines.join(" · ") + (clusters.length > 8 ? " …" : "");
   }
   descEl.classList.add('active');
 }
@@ -117,7 +120,7 @@ setInterval(() => {
   const decay = Math.pow(0.996, speed);
   for (let i=0;i<field.length;i++) field[i] *= decay;
   if (Math.random() < 0.16 * speed) createCluster();
-  updateDesc();
+  updateDesc(); // ← каждый кадр — живые проценты
 
   ctx.fillStyle = '#000008';
   ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -141,7 +144,7 @@ async function enter() {
 
   document.getElementById('loading').style.display = 'block';
 
-  let result = null;
+  let result;
   try {
     const resp = await fetch(ONTOLOGY_SERVER, {
       method: "POST",
@@ -155,17 +158,19 @@ async function enter() {
 
   document.getElementById('loading').style.display = 'none';
 
-  if (result.error || !result.versions || result.versions.length === 0) {
+  if (result.error || !result.clusters) {
     document.getElementById('desc').textContent = "приватный профиль · базовая онтология";
     document.getElementById('desc').classList.add('active');
+    document.getElementById('downloadBtn').classList.remove('active');
     return;
   }
 
-  clusters = result.versions;
-  updateDesc();
+  clusters = result.clusters.sort((a,b) => b.weight - a.weight);
+  updateDesc(); // ← сразу видно на экране!
 
-  let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\nОнтология: ${clusters.length} активных идентичностей\n\n`;
-  clusters.forEach((c,i) => txt += `${i+1}. ${c.name_ru} (${c.percentage}%)\n`);
+  // паспорт
+  let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\nОнтология: ${clusters.length} версий себя\n\n`;
+  clusters.forEach((c,i) => txt += `${i+1}. ${c.name} (вес ${c.weight})\n`);
   const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   document.getElementById('downloadBtn').onclick = () => {
@@ -183,7 +188,7 @@ async function enter() {
 function showUsername() {
   document.getElementById('welcome').classList.remove('active');
   document.getElementById('username').classList.add('active');
-  setTimeout(() => document.getElementById('user')?.focus(), 300);
+  setTimeout(() => document.getElementById('user').focus(), 300);
 }
 
 document.getElementById('back').onclick = () => location.reload();
@@ -195,4 +200,3 @@ document.addEventListener('wheel', e => {
 </script>
 </body>
 </html>
-
