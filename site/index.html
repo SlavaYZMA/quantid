@@ -18,11 +18,11 @@
   .intro button{background:none;border:none;color:#fff;font-size:18px;letter-spacing:3px;cursor:pointer;padding:10px 0;position:relative}
   .intro button::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:#fff;transform:scaleX(0);transition:transform 0.4s ease}
   .intro button:hover::after{transform:scaleX(1)}
-  .back{position:fixed;top:24px;left:24px;z-index:20;color:#fff;font-size:15px;background:rgba(0,0,0,0.Active6);padding:8px 16px;cursor:pointer;display:none;border-bottom:1px solid #fff}
+  .back{position:fixed;top:24px;left:24px;z-index:20;color:#fff;font-size:15px;background:rgba(0,0,0,0.6);padding:8px 16px;cursor:pointer;display:none;border-bottom:1px solid #fff}
   .back.active{display:block}
   .speed{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:20;color:#fff;font-size:17px;background:rgba(0,0,0,0.7);padding:8px 24px;display:none}
   .speed.active{display:block}
-  .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none}
   .desc.active{display:block}
   .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none;line-height:1.6;text-align:center}
   .download-btn{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none}
@@ -58,7 +58,7 @@
 <div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ</div>
 
 <script>
-// ТВОЯ НОВАЯ ССЫЛКА
+// ТВОЯ ССЫЛКА
 const ONTOLOGY_SERVER = "https://slavayzma--quantum-ontology-v5-ontology.modal.run";
 
 const canvas = document.getElementById('c');
@@ -80,7 +80,7 @@ function createCluster() {
   if (clusters.length === 0) return;
   const x0 = Math.random()*size, y0 = Math.random()*size, z0 = Math.random()*size;
   const rho = 5 + Math.random()*9;
-  const r = Math.floor(Math.random() * clusters.length);
+  const r = weightedRandom(clusters.map(c => c.percentage || c.weight || 1));
   const s = 2.4;
   const phase = Math.random()*Math.PI*2;
 
@@ -92,6 +92,13 @@ function createCluster() {
     const d = Math.hypot(dx,dy,dz);
     if (d < rho*1.8) field[z*size*size + y*size + x] += s * Math.exp(-d*d/(rho*rho)) * Math.cos(t*0.03 + phase);
   }
+}
+
+function weightedRandom(weights) {
+  const sum = weights.reduce((a,b)=>a+b,0);
+  let r = Math.random()*sum;
+  for (let i=0;i<weights.length;i++) { r -= weights[i]; if (r <= 0) return i; }
+  return weights.length-1;
 }
 
 function updateDesc() {
@@ -131,6 +138,7 @@ setInterval(() => {
 async function enter() {
   const raw = document.getElementById('user')?.value.trim().replace(/^@/,'');
   if (!raw) return alert("Введи username");
+
   document.getElementById('loading').style.display = 'block';
 
   let result = null;
@@ -150,15 +158,12 @@ async function enter() {
   if (result.error || !result.versions || result.versions.length === 0) {
     document.getElementById('desc').textContent = "приватный профиль · базовая онтология";
     document.getElementById('desc').classList.add('active');
-    document.getElementById('downloadBtn').classList.remove('active');
     return;
   }
 
-  // ← НАСТОЯЩИЕ ИДЕНТИЧНОСТИ ИЗ ТВОЕГО СЛОВАРЯ
   clusters = result.versions;
   updateDesc();
 
-  // Паспорт
   let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\nОнтология: ${clusters.length} активных идентичностей\n\n`;
   clusters.forEach((c,i) => txt += `${i+1}. ${c.name_ru} (${c.percentage}%)\n`);
   const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
@@ -178,7 +183,7 @@ async function enter() {
 function showUsername() {
   document.getElementById('welcome').classList.remove('active');
   document.getElementById('username').classList.add('active');
-  setTimeout(() => document.getElementById('user').focus(), 300);
+  setTimeout(() => document.getElementById('user')?.focus(), 300);
 }
 
 document.getElementById('back').onclick = () => location.reload();
@@ -190,4 +195,3 @@ document.addEventListener('wheel', e => {
 </script>
 </body>
 </html>
-
