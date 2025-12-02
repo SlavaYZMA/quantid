@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
 import re
 from typing import Dict, List
 
-app = modal.App("quantum-ontology-v3")
+app = modal.App("quantum-ontology-v4")
 
 image = modal.Image.debian_slim().pip_install(
     "fastapi", "uvicorn[standard]", "requests", "sentence-transformers[torch]", "scikit-learn"
