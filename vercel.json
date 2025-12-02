@@ -1,23 +1,18 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "site/index.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "api/ontology.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    { "src": "/api/ontology", "dest": "/api/ontology.js" },
-    { "src": "/(.*)", "dest": "/site/index.html" }
-  ],
   "functions": {
     "api/ontology.js": {
       "memory": 1024,
       "maxDuration": 40
     }
-  }
+  },
+  "routes": [
+    {
+      "src": "/api/ontology",
+      "dest": "/api/ontology.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/site/index.html"
+    }
+  ]
 }
