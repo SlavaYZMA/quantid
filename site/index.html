@@ -2,13 +2,13 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>Квантовая идентичность · Влада Садик</title>
+<title>Квантовая онтология · Влада Садик</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body,html{height:100%;overflow:hidden;background:#000;font-family:'IBM Plex Mono',monospace}
-  canvas{position:fixed;inset:0;z-index:1;transition:filter 1.8s ease;filter:brightness(0.38) blur(4px)}
+  canvas{position:fixed;inset:0;z-index:1;transition:filter 2s ease-in-out}
   canvas.clear{filter:none}
   .intro{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:40px;opacity:0;visibility:hidden;transition:opacity 1.6s ease}
   .intro.active{opacity:1;visibility:visible}
@@ -22,7 +22,7 @@
   .back.active{display:block}
   .speed{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:20;color:#fff;font-size:17px;background:rgba(0,0,0,0.7);padding:8px 24px;display:none}
   .speed.active{display:block}
-  .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none}
+  .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none;backdrop-filter:blur(4px)}
   .desc.active{display:block}
   .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none;line-height:1.6;text-align:center}
   .download-btn{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none}
@@ -32,34 +32,34 @@
 <body>
 
 <canvas id="c"></canvas>
-<div class="loading" id="loading">ИИ входит в тебя...<br>8–20 секунд</div>
+<div class="loading" id="loading">ИИ входит в тебя...<br>10–25 секунд</div>
 
 <div class="intro active" id="welcome">
   <div>
-    <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
+    <h1>КВАНТОВАЯ ОНТОЛОГИЯ 81</h1>
     <div class="year">2025—2026 · Влада Садик</div>
-    <p>Твоя личность — не список ролей. Это живая квантовая пена, где каждая мысль, страх, любовь и творчество — настоящий инстантон.</p>
+    <p>Твоя личность — не хаос. Это точная суперпозиция 81 научного архетипа.<br>Введи свой Instagram — и увидишь себя настоящую.</p>
     <button type="button" onclick="showUsername()">НАЧАТЬ</button>
   </div>
 </div>
 
 <div class="intro" id="username">
   <div>
-    <h1>ВВЕДИ СВОЙ INSTAGRAM</h1>
+    <h1>ВВЕДИ @username</h1>
     <p>Только публичный профиль · ничего не сохраняется</p>
-    <input type="text" id="user" placeholder="@username" autocomplete="off">
+    <input type="text" id="user" placeholder="@iconicyzma" autocomplete="off">
     <button type="button" onclick="enter()">ЗАПУСТИТЬ</button>
   </div>
 </div>
 
-<div class="back" id="back">← назад</div>
+<div class="back active" id="back" onclick="location.reload()">← назад</div>
 <div class="speed" id="speed">скор ×1.00</div>
-<div class="desc" id="desc">анализ личности...</div>
+<div class="desc" id="desc">анализ 81 архетипа...</div>
 <div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ</div>
 
 <script>
-// ← ТВОЯ АКТУАЛЬНАЯ РАБОЧАЯ ССЫЛКА (после последнего деплоя)
-const ONTOLOGY_SERVER = "https://slavayzma--quantum-ontology-ontology.modal.run";
+// ← ТВОЯ НОВАЯ РАБОЧАЯ ССЫЛКА v2
+const ONTOLOGY_SERVER = "https://slavayzma--quantum-ontology-v2-ontology.modal.run";
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
@@ -71,17 +71,14 @@ const field = new Float32Array(size*size*size);
 let t = 0;
 let speed = 1.0;
 let clusters = [];
-
-// Начальная пена
-clusters = "ночной свет тень пульс эхо шёпот вспышка пустота".split(" ").map(name => ({name, weight: 0.8 + Math.random()*0.6}));
-for (let i = 0; i < 60; i++) setTimeout(() => createCluster(), i*30);
+let dominantColor = "#FFFFFF";
 
 function createCluster() {
   if (clusters.length === 0) return;
   const x0 = Math.random()*size, y0 = Math.random()*size, z0 = Math.random()*size;
   const rho = 5 + Math.random()*9;
-  const r = weightedRandom(clusters.map(c => c.weight));
-  const s = clusters[r].weight * (1.6 + Math.random()*0.8);
+  const i = Math.floor(Math.random()*clusters.length);
+  const s = clusters[i].weight * 0.8;
   const phase = Math.random()*Math.PI*2;
 
   for (let dx = -rho*2|0; dx < rho*2; dx++) 
@@ -94,22 +91,12 @@ function createCluster() {
   }
 }
 
-function weightedRandom(weights) {
-  const sum = weights.reduce((a,b)=>a+b,0);
-  let r = Math.random()*sum;
-  for (let i=0;i<weights.length;i++) { r -= weights[i]; if (r <= 0) return i; }
-  return weights.length-1;
-}
-
-// ← ГЛАВНОЕ ИСПРАВЛЕНИЕ: теперь кластеры ВСЕГДА видны!
 function updateDesc() {
   const descEl = document.getElementById('desc');
   if (!clusters || clusters.length === 0) {
-    descEl.textContent = "анализ личности...";
+    descEl.textContent = "анализ 81 архетипа...";
   } else {
-    const total = clusters.reduce((s, c) => s + c.weight, 0);
-    const top = clusters.slice(0, 8);
-    const lines = top.map(c => `${c.name} ${(c.weight / total * 100).toFixed(1)}%`);
+    const lines = clusters.slice(0,8).map(c => `${c.name} ${c.weight.toFixed(1)}%`);
     descEl.textContent = lines.join(" · ") + (clusters.length > 8 ? " …" : "");
   }
   descEl.classList.add('active');
@@ -120,7 +107,7 @@ setInterval(() => {
   const decay = Math.pow(0.996, speed);
   for (let i=0;i<field.length;i++) field[i] *= decay;
   if (Math.random() < 0.16 * speed) createCluster();
-  updateDesc(); // ← каждый кадр — живые проценты
+  updateDesc();
 
   ctx.fillStyle = '#000008';
   ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -130,7 +117,7 @@ setInterval(() => {
     for (let z=0;z<size;z++) sum += field[z*size*size + y*size + x];
     const q = sum/size;
     if (Math.abs(q)>0.011) {
-      const hue = q>0?188:298;
+      const hue = q>0 ? parseInt(dominantColor.slice(1,3),16)/255*60+180 : parseInt(dominantColor.slice(1,3),16)/255*60+300;
       const i = Math.min(Math.abs(q)*11,1);
       ctx.fillStyle = `hsla(${hue},100%,${58+i*37}%,${i})`;
       ctx.fillRect(x*sx,y*sy,sx+1,sy+1);
@@ -159,26 +146,32 @@ async function enter() {
   document.getElementById('loading').style.display = 'none';
 
   if (result.error || !result.clusters) {
-    document.getElementById('desc').textContent = "приватный профиль · базовая онтология";
+    document.getElementById('desc').textContent = result.error || "приватный профиль";
     document.getElementById('desc').classList.add('active');
-    document.getElementById('downloadBtn').classList.remove('active');
     return;
   }
 
-  clusters = result.clusters.sort((a,b) => b.weight - a.weight);
-  updateDesc(); // ← сразу видно на экране!
+  clusters = result.clusters;
+  dominantColor = result.dominant_color || "#FFFFFF";
+  updateDesc();
 
   // паспорт
-  let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\nОнтология: ${clusters.length} версий себя\n\n`;
-  clusters.forEach((c,i) => txt += `${i+1}. ${c.name} (вес ${c.weight})\n`);
+  let txt = `КВАНТОВАЯ ОНТОЛОГИЯ 81 · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\n`;
+  txt += `Доминирующий архетип: ${clusters[0].name} (${clusters[0].weight.toFixed(1)}%)\n`;
+  txt += `Валентность: ${clusters[0].valence}\n`;
+  txt += `Страх: ${clusters[0].core_fear}\n`;
+  txt += `Желание: ${clusters[0].core_desire}\n\n`;
+  txt += `Топ-12 версий себя:\n\n`;
+  clusters.forEach((c,i) => txt += `${i+1}. ${c.name} — ${c.weight.toFixed(1)}%\n`);
+
   const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   document.getElementById('downloadBtn').onclick = () => {
-    const a = document.createElement('a'); a.href = url; a.download = `quantum-passport_${raw}_${new Date().toISOString().slice(0,10)}.txt`; a.click();
+    const a = document.createElement('a'); a.href = url; a.download = `ontology81_${raw}_${new Date().toISOString().slice(0,10)}.txt`; a.click();
   };
   document.getElementById('downloadBtn').classList.add('active');
 
-  document.title = `Квантовая идентичность · @${raw}`;
+  document.title = `Онтология 81 · @${raw}`;
   document.getElementById('username').classList.remove('active');
   canvas.classList.add('clear');
   document.getElementById('back').classList.add('active');
@@ -190,8 +183,6 @@ function showUsername() {
   document.getElementById('username').classList.add('active');
   setTimeout(() => document.getElementById('user').focus(), 300);
 }
-
-document.getElementById('back').onclick = () => location.reload();
 
 document.addEventListener('wheel', e => {
   speed = e.deltaY < 0 ? Math.min(speed*1.4, 100) : Math.max(speed/1.4, 0.01);
