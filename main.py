@@ -27,7 +27,7 @@ except FileNotFoundError:
     VOCAB = []  # fallback, если файла нет
 
 # Загружаем модель один раз
-model = SentenceTransformer('all-MiniLM-L6-v2')
+model = SentenceTransformer('distiluse-base-multilingual-cased-v2')
 
 @app.post("/ontology")
 async def ontology(request: Request):
