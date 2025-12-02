@@ -5,6 +5,7 @@ import requests
 import re
 import numpy as np
 from sklearn.cluster import KMeans
+import time
 from typing import List
 
 app = FastAPI()
@@ -19,65 +20,70 @@ app.add_middleware(
 
 HF_MODEL = "sergeyzh/rubert-tiny-turbo"
 HF_URL = f"https://api-inference.huggingface.co/models/{HF_MODEL}"
-HF_HEADERS = {}  # если поставишь свой токен — будет быстрее и без лимитов
+HF_HEADERS = {}  # ← сюда можно вставить свой HF токен, если сделаешь (тогда будет мгновенно)
 
-def chunk_texts(texts: List[str], max_per_request: int = 8) -> List[List[str]]:
-    """Разбиваем на чанки, чтобы не превышать лимит HF"""
-    chunks = []
-    chunks = []
-    for i in range(0, len(texts), max_per_request):
-        chunks.append(texts[i:i + max_per_request])
-    return chunks
+def get_embeddings_safe(texts: List[str]) -> np.ndarray:
+    chunks = [texts[i:i+7] for i in range(0, len(texts), 7)]
+    all_emb = []
 
-def get_embeddings_safely(texts: List[str]) -> np.ndarray:
-    all_embeddings = []
-    for chunk in chunk_texts(texts, 8):
-        for _ in range(3):  # retry до 3 раз
+    for i, chunk in enumerate(chunks):
+        for attempt in range(6):  # максимум 6 попыток = ~2 минуты
             try:
-                resp = requests.post(HF_URL, headers=HF_HEADERS, json={"inputs": chunk}, timeout=45)
+                print(f"Запрос эмбеддингов чанк {i+1}/{len(chunks)}, попытка {attempt+1}")
+                resp = requests.post(
+                    HF_URL,
+                    headers=HF_HEADERS,
+                    json={"inputs": chunk, "options": {"wait_for_model": True}},
+                    timeout=90
+                )
                 if resp.status_code == 200:
                     emb = np.array(resp.json())
-                    all_embeddings.append(emb)
+                    all_emb.append(emb)
+                    print(f"Чанк {i+1} получен успешно")
                     break
                 elif resp.status_code == 503:
-                    # модель грузится — ждём
-                    import time
-                    time.sleep(8)
+                    print("Модель ещё грузится на HF, ждём 12 сек...")
+                    time.sleep(12)
                     continue
                 else:
-                    raise Exception(f"HF {resp.status_code}: {resp.text}")
-            except:
-                import time
-                time.sleep(5)
+                    print(f"HF ошибка {resp.status_code}: {resp.text}")
+                    raise Exception(f"HF {resp.status_code}")
+            except Exception as e:
+                print(f"Ошибка запроса: {e}")
+                if attempt == 5:
+                    raise
+                time.sleep(10)
         else:
-            raise Exception("HuggingFace не отвечает после 3 попыток")
-    return np.vstack(all_embeddings)
+            raise Exception("Не удалось получить эмбеддинги после всех попыток")
+
+    return np.vstack(all_emb)
 
 @app.get("/")
 def root():
-    return {"status": "QuantID 81 онлайн · 2025", "artist": "Влада Садик"}
+    return {"msg": "Квантовая онтология 81 · Влада Садик · жива"}
 
 @app.post("/ontology")
 async def ontology(request: Request):
     try:
         data = await request.json()
         username = data.get("username", "").lstrip("@").strip()
+
         if not username:
             return JSONResponse({"error": "укажи username"}, status_code=400)
 
-        # Apify
-        apify_resp = requests.post(
+        # === Apify ===
+        print(f"Запуск Apify для @{username}")
+        apify = requests.post(
             "https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items",
             params={"token": "apify_api_XFk4W4rmvDDfnSxhsYzkUbHnHPdJ0R1I2wyz"},
             json={"usernames": [username], "resultsLimit": 60},
             timeout=120
-        )
-        profile_data = apify_resp.json()
+        ).json()
 
-        if not profile_data:
-            return JSONResponse({"error": "профиль не найден или приватный"}, status_code=404)
+        if not apify:
+            return JSONResponse({"error": "профиль не найден"}, status_code=404)
 
-        profile = profile_data[0]
+        profile = apify[0]
         texts = []
         if profile.get("biography"):
             texts.append(profile["biography"])
@@ -86,10 +92,12 @@ async def ontology(request: Request):
                 texts.append(caption.strip())
 
         if len(texts) < 4:
-            return JSONResponse({"error": "слишком мало текстов для анализа"}, status_code=400)
+            return JSONResponse({"error": "мало текста"}, status_code=400)
 
-        # ← САМЫЙ ВАЖНЫЙ БЛОК — безопасные эмбеддинги
-        embeddings = get_embeddings_safely(texts)
+        print(f"Собрано {len(texts)} текстов, начинаю эмбеддинги...")
+
+        # === Эмбеддинги с ожиданием загрузки модели ===
+        embeddings = get_embeddings_safe(texts)
         embeddings = embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
 
         k = max(5, min(15, len(texts)//3))
@@ -98,21 +106,24 @@ async def ontology(request: Request):
 
         clusters = []
         for i in range(k):
-            idxs = np.where(labels == i)[0]
+            idxs = [j for j, l in enumerate(labels) if l == i]
             cluster_text = " ".join(texts[j] for j in idxs).lower()
             words = re.findall(r'[а-яё]{4,}', cluster_text)
-            top_words = [w for w, _ in __import__("collections").Counter(words).most_common(8)]
-            name = " ".join(top_words[:4]).capitalize() if top_words else f"версия {i+1}"
-            weight = round(len(idxs) / len(texts) * 100, 1)
+            top = [w for w, _ in __import__("collections").Counter(words).most_common(7)]
+            name = " ".join(top[:4]).capitalize() if top else f"архетип {i+1}"
+            weight = round(len(idxs)/len(texts)*100, 1)
             clusters.append({"name": name, "weight": weight})
+
+        print(f"Успешно! @{username} — {len(clusters)} архетипов")
 
         return {
             "artist": f"@{username}",
             "identities": sorted(clusters, key=lambda x: -x["weight"]),
             "posts": len(texts),
-            "model": "sergeyzh/rubert-tiny-turbo",
-            "status": "success"
+            "model": "sergeyzh/rubert-tiny-turbo"
         }
 
     except Exception as e:
-        return JSONResponse({"error": f"внутренняя ошибка: {str(e)}"}, status_code=500)
+        error_msg = f"Ошибка: {str(e)}"
+        print(error_msg)
+        return JSONResponse({"error": error_msg}, status_code=500)
