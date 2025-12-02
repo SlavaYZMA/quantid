@@ -19,7 +19,7 @@ app.add_middleware(
 )
 
 HF_MODEL = "sergeyzh/rubert-tiny-turbo"
-HF_URL = f"https://api-inference.huggingface.co/models/{HF_MODEL}"
+HF_URL = f"https://router.huggingface.co/hf-inference/models/{HF_MODEL}"
 HF_HEADERS = {}  # ← сюда можно вставить свой HF токен, если сделаешь (тогда будет мгновенно)
 
 def get_embeddings_safe(texts: List[str]) -> np.ndarray:
