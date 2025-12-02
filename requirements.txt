@@ -3,6 +3,5 @@ uvicorn==0.38.0
 requests==2.32.5
 sentence-transformers==5.1.2
 scikit-learn==1.7.2
-# Самая лёгкая версия torch — только CPU, без CUDA-монстров
-torch==2.9.1+cpu --index-url https://download.pytorch.org/whl/cpu
+torch --index-url https://download.pytorch.org/whl/cpu
 transformers==4.57.3
