@@ -8,7 +8,8 @@
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body,html{height:100%;overflow:hidden;background:#000;font-family:'IBM Plex Mono',monospace}
-  canvas{position:fixed;inset:0;z-index:1;transition:filter 2s ease,background 3s ease}
+  canvas{position:fixed;inset:0;z-index:1;transition:filter 1.8s ease;filter:brightness(0.38) blur(4px)}
+  canvas.clear{filter:none}
   .intro{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:40px;opacity:0;visibility:hidden;transition:opacity 1.6s ease}
   .intro.active{opacity:1;visibility:visible}
   .intro h1{font-size:38px;font-weight:600;letter-spacing:6px;margin-bottom:16px}
@@ -21,7 +22,7 @@
   .back.active{display:block}
   .speed{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:20;color:#fff;font-size:17px;background:rgba(0,0,0,0.7);padding:8px 24px;display:none}
   .speed.active{display:block}
-  .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none;backdrop-filter:blur(8px)}
+  .desc{position:fixed;bottom:24px;left:24px;right:24px;z-index:20;color:#fff;font-size:16px;line-height:1.7;background:rgba(0,0,0,0.5);padding:20px;display:none}
   .desc.active{display:block}
   .loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;color:#fff;font-size:22px;background:rgba(0,0,0,0.9);padding:35px 70px;border:1px solid #fff;display:none;line-height:1.6;text-align:center}
   .download-btn{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:18px 40px;font-size:18px;letter-spacing:3px;cursor:pointer;z-index:30;border:2px solid #fff;border-radius:8px;box-shadow:0 15px 40px rgba(0,0,0,0.7);font-weight:600;display:none}
@@ -31,21 +32,21 @@
 <body>
 
 <canvas id="c"></canvas>
-<div class="loading" id="loading">ИИ входит в тебя...<br>10–25 секунд</div>
+<div class="loading" id="loading">ИИ входит в тебя...<br>8–20 секунд</div>
 
 <div class="intro active" id="welcome">
   <div>
-    <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ 2.0</h1>
-    <div class="year">2025 · Влада Садик</div>
-    <p>Твоя личность — это не хаос постов.<br>Это 81 научный архетип, измеренный в реальном времени.</p>
+    <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
+    <div class="year">2025—2026 · Влада Садик</div>
+    <p>Твоя личность — не список ролей. Это живая квантовая пена, где каждая мысль, страх, любовь и творчество — настоящий инстантон.</p>
     <button type="button" onclick="showUsername()">НАЧАТЬ</button>
   </div>
 </div>
 
 <div class="intro" id="username">
   <div>
-    <h1>ВВЕДИ @INSTAGRAM</h1>
-    <p>Только публичный профиль · данные не сохраняются</p>
+    <h1>ВВЕДИ СВОЙ INSTAGRAM</h1>
+    <p>Только публичный профиль · ничего не сохраняется</p>
     <input type="text" id="user" placeholder="@username" autocomplete="off">
     <button type="button" onclick="enter()">ЗАПУСТИТЬ</button>
   </div>
@@ -53,12 +54,12 @@
 
 <div class="back" id="back">← назад</div>
 <div class="speed" id="speed">скор ×1.00</div>
-<div class="desc" id="desc">анализ 81 архетипа...</div>
+<div class="desc" id="desc">анализ личности...</div>
 <div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ</div>
 
 <script>
-// НОВАЯ ССЫЛКА v2
-const ONTOLOGY_SERVER = "https://slavayzma--quantum-ontology-v2-ontology.modal.run";
+// ← ТВОЯ АКТУАЛЬНАЯ РАБОЧАЯ ССЫЛКА (после последнего деплоя)
+const ONTOLOGY_SERVER = "https://slavayzma--quantum-ontology-ontology.modal.run";
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
@@ -70,8 +71,9 @@ const field = new Float32Array(size*size*size);
 let t = 0;
 let speed = 1.0;
 let clusters = [];
-let dominantColor = "#9C27B0";
 
+// Начальная пена
+clusters = "ночной свет тень пульс эхо шёпот вспышка пустота".split(" ").map(name => ({name, weight: 0.8 + Math.random()*0.6}));
 for (let i = 0; i < 60; i++) setTimeout(() => createCluster(), i*30);
 
 function createCluster() {
@@ -96,16 +98,19 @@ function weightedRandom(weights) {
   const sum = weights.reduce((a,b)=>a+b,0);
   let r = Math.random()*sum;
   for (let i=0;i<weights.length;i++) { r -= weights[i]; if (r <= 0) return i; }
-  return 0;
+  return weights.length-1;
 }
 
+// ← ГЛАВНОЕ ИСПРАВЛЕНИЕ: теперь кластеры ВСЕГДА видны!
 function updateDesc() {
   const descEl = document.getElementById('desc');
   if (!clusters || clusters.length === 0) {
-    descEl.textContent = "анализ 81 архетипа...";
+    descEl.textContent = "анализ личности...";
   } else {
-    const lines = clusters.map(c => `${c.name} ${c.weight.toFixed(1)}%`);
-    descEl.innerHTML = lines.join(" · ") + (clusters.length > 8 ? " …" : "");
+    const total = clusters.reduce((s, c) => s + c.weight, 0);
+    const top = clusters.slice(0, 8);
+    const lines = top.map(c => `${c.name} ${(c.weight / total * 100).toFixed(1)}%`);
+    descEl.textContent = lines.join(" · ") + (clusters.length > 8 ? " …" : "");
   }
   descEl.classList.add('active');
 }
@@ -115,9 +120,7 @@ setInterval(() => {
   const decay = Math.pow(0.996, speed);
   for (let i=0;i<field.length;i++) field[i] *= decay;
   if (Math.random() < 0.16 * speed) createCluster();
-
-  // Цвет фона = доминирующая валентность
-  document.body.style.background = dominantColor + '18';
+  updateDesc(); // ← каждый кадр — живые проценты
 
   ctx.fillStyle = '#000008';
   ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -127,13 +130,12 @@ setInterval(() => {
     for (let z=0;z<size;z++) sum += field[z*size*size + y*size + x];
     const q = sum/size;
     if (Math.abs(q)>0.011) {
-      const hue = q>0 ? 300 : 180;
+      const hue = q>0?188:298;
       const i = Math.min(Math.abs(q)*11,1);
       ctx.fillStyle = `hsla(${hue},100%,${58+i*37}%,${i})`;
       ctx.fillRect(x*sx,y*sy,sx+1,sy+1);
     }
   }
-  updateDesc();
 }, 16);
 
 async function enter() {
@@ -151,36 +153,34 @@ async function enter() {
     });
     result = await resp.json();
   } catch(e) {
-    result = {error: "сервер спит"};
+    result = {error: "сервер спит или профиль приватный"};
   }
 
   document.getElementById('loading').style.display = 'none';
 
   if (result.error || !result.clusters) {
-    document.getElementById('desc').textContent = result.error || "ошибка";
+    document.getElementById('desc').textContent = "приватный профиль · базовая онтология";
     document.getElementById('desc').classList.add('active');
+    document.getElementById('downloadBtn').classList.remove('active');
     return;
   }
 
-  clusters = result.clusters;
-  dominantColor = result.dominant_color || "#9C27B0";
-  updateDesc();
+  clusters = result.clusters.sort((a,b) => b.weight - a.weight);
+  updateDesc(); // ← сразу видно на экране!
 
   // паспорт
-  let txt = `КВАНТОВАЯ ИДЕНТИЧНОСТЬ 2.0 · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\n81 архетип Narrativной психологии:\n\n`;
-  clusters.forEach((c,i) => txt += `${i+1}. ${c.name} — ${c.weight.toFixed(1)}% ${c.valence}\n   страх: ${c.core_fear} · желание: ${c.core_desire}\n`);
-  txt += `\nДоминирующая валентность: ${clusters[0].valence}\nЦвет твоей пены: ${dominantColor}`;
-
+  let txt = `КВАНТОВЫЙ ПАСПОРТ · @${raw}\n${new Date().toLocaleString('ru-RU')}\n\nОнтология: ${clusters.length} версий себя\n\n`;
+  clusters.forEach((c,i) => txt += `${i+1}. ${c.name} (вес ${c.weight})\n`);
   const blob = new Blob([txt], {type: "text/plain;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   document.getElementById('downloadBtn').onclick = () => {
-    const a = document.createElement('a'); a.href = url; a.download = `quantum-passport-v2_${raw}_${new Date().toISOString().slice(0,10)}.txt`; a.click();
+    const a = document.createElement('a'); a.href = url; a.download = `quantum-passport_${raw}_${new Date().toISOString().slice(0,10)}.txt`; a.click();
   };
   document.getElementById('downloadBtn').classList.add('active');
 
-  document.title = `Квантовая идентичность 2.0 · @${raw}`;
+  document.title = `Квантовая идентичность · @${raw}`;
   document.getElementById('username').classList.remove('active');
-  canvas.style.filter = 'none';
+  canvas.classList.add('clear');
   document.getElementById('back').classList.add('active');
   document.getElementById('speed').classList.add('active');
 }
