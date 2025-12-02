@@ -1,6 +1,8 @@
 fastapi==0.122.0
 uvicorn==0.38.0
 requests==2.32.5
+sentence-transformers==5.1.2
 scikit-learn==1.7.2
-spacy==3.7.5
-spacy-model-ru_core_news_sm
+transformers==4.57.3
+# Убираем версию — pip сам выберет CPU-версию последнюю (2.9.1+cpu, ~80 МБ)
+torch
