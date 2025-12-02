@@ -17,7 +17,7 @@ app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 # Самая лёгкая русскоязычная модель — весит ~90 МБ, стартует за 2 секунды
-model = SentenceTransformer("cointegrated/rubert-tiny2")
+model = SentenceTransformer("sergeyzh/rubert-tiny-turbo")
 
 @app.post("/ontology")
 async def ontology(request: Request):
