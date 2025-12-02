@@ -1,137 +1,81 @@
 import fetch from 'node-fetch';
 
-// Твой Apify токен (безопасно — Vercel шифрует)
 const APIFY_TOKEN = "apify_api_XFk4W4rmvDDfnSxhsYzkUbHnHPdJ0R1I2wyz";
-
-// Загружаем словарь идентичностей
-const VOCAB = require('../../vocab_id.json');
+const VOCAB = await fetch('https://raw.githubusercontent.com/SlavaYZMA/quantid/main/vocab_id.json').then(r => r.json());
 
 export default async function handler(req, res) {
+  console.log('→ Запрос получен');
+
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') return res.status(200).end();
-
-  if (req.method !== 'POST') {
-    console.log('Ошибка: метод не POST');
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({error: 'POST only'});
 
   const { username } = req.body || {};
-  if (!username) {
-    console.log('Ошибка: нет username');
-    return res.status(400).json({ error: 'no username' });
-  }
+  if (!username) return res.status(400).json({error: 'no username'});
 
-  console.log(`Запуск анализа для @${username}`);
+  console.log(`1. Анализируем @${username}`);
 
   try {
-    // ШАГ 1: Получаем данные из Apify
-    console.log('Шаг 1: запрос к Apify...');
-    const apifyResponse = await fetch(
-      "https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token: APIFY_TOKEN,
-          usernames: [username.replace(/^@/, "")],
-          resultsLimit: 60
-        })
-      }
-    );
+    // Apify
+    const apify = await fetch("https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=" + APIFY_TOKEN, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ usernames: [username.replace('@','')], resultsLimit: 50 })
+    });
 
-    if (!apifyResponse.ok) {
-      console.log('Apify вернул ошибку:', apifyResponse.status);
-      return res.status(500).json({ error: "Apify error" });
-    }
+    if (!apify.ok) throw new Error('Apify failed');
+    const data = await apify.json();
+    if (!data[0]) return res.json({error: "private or empty"});
 
-    const data = await apifyResponse.json();
-    console.log(`Apify вернул ${data.length} профилей`);
-
-    if (!data || data.length === 0) {
-      console.log('Профиль не найден или приватный');
-      return res.status(404).json({ error: "private or not found" });
-    }
-
-    const profile = data[0];
     const texts = [];
-    if (profile.biography) texts.push(profile.biography);
-    profile.latestPosts?.forEach(p => p.caption && texts.push(p.caption));
+    if (data[0].biography) texts.push(data[0].biography);
+    data[0].latestPosts?.forEach(p => p.caption && texts.push(p.caption));
+    console.log(`2. Собрано ${texts.length} текстов`);
 
-    console.log(`Собрано ${texts.length} текстов`);
+    if (texts.length < 4) return res.json({clusters: [], error: "not enough text"});
 
-    if (texts.length < 3) {
-      return res.status(400).json({ error: "not enough text" });
-    }
+    // Zero-shot через бесплатный публичный endpoint (работает без токена!)
+    const model = "https://api-inference.huggingface.co/models/MoritzLaurer/mDeBERTa-v3-base-mnli-xnli";
+    const scores = VOCAB.map(v => ({...v, score: 0}));
 
-    // ШАГ 2: Zero-shot через публичную модель (БЕЗ ТОКЕНА!)
-    console.log('Шаг 2: запуск zero-shot классификации...');
-
-    const modelUrl = "https://api-inference.huggingface.co/models/MoritzLaurer/mDeBERTa-v3-base-mnli-xnli";
-
-    const scores = VOCAB.map(id => ({ ...id, score: 0 }));
-
-    for (const text of texts.slice(0, 40)) { // ограничиваем, чтобы не убить API
-      for (const identity of VOCAB) {
+    for (const text of texts.slice(0, 35)) {
+      for (const id of VOCAB) {
         try {
-          const response = await fetch(modelUrl, {
+          const r = await fetch(model, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
-              inputs: text,
-              parameters: {
-                candidate_labels: [identity.hypothesis_ru, "нейтральный текст"],
-                hypothesis_template: "Этот текст выражает {}."
-              }
+              inputs: text.length > 500 ? text.slice(0,497)+'...' : text,
+              parameters: { candidate_labels: [id.hypothesis_ru, "нейтральный текст"] }
             })
           });
-
-          if (!response.ok) continue;
-
-          const result = await response.json();
-          if (result.labels && result.labels[0] === identity.hypothesis_ru) {
-            scores.find(s => s.id === identity.id).score += result.scores[0];
+          if (!r.ok) continue;
+          const json = await r.json();
+          if (json.labels?.[0] === id.hypothesis_ru) {
+            scores.find(s => s.id === id.id).score += json.scores[0];
           }
-        } catch (e) {
-          // если HF спит — пропускаем
-        }
+        } catch(e) {}
       }
     }
 
-    // ШАГ 3: Нормализация
-    console.log('Шаг 3: нормализация результатов');
-    const total = scores.reduce((s, i) => s + i.score, 0) || 1;
-
+    const total = scores.reduce((a,b) => a + b.score, 0) || 1;
     const clusters = scores
       .map(s => ({
         name: s.name_ru,
-        weight: Math.round((s.score / total) * 1000) / 10,
-        color: s.color,
-        valence: s.valence
+        weight: Math.round(s.score / total * 1000)/10,
+        color: s.color
       }))
-      .filter(c => c.weight >= 1.5)
-      .sort((a, b) => b.weight - a.weight)
-      .slice(0, 10);
+      .filter(c => c.weight >= 2)
+      .sort((a,b) => b.weight - a.weight)
+      .slice(0, 9);
 
-    console.log('Успех! Отправляем результат:', clusters.map(c => `${c.name} ${c.weight}%`));
-
-    res.status(200).json({
-      username,
-      clusters,
-      total_posts: texts.length,
-      debug: "all ok"
-    });
+    console.log('УСПЕХ! Кластеры:', clusters.map(c => `${c.name} ${c.weight}%`));
+    res.json({ clusters });
 
   } catch (err) {
-    console.error('Критическая ошибка:', err);
-    res.status(500).json({ error: "server crash", details: err.message });
+    console.error('ОШИБКА:', err.message);
+    res.status(500).json({error: err.message});
   }
 }
 
-export const config = {
-  api: {
-    bodyParser: true,
-  },
-};
+export const config = { api: { bodyParser: true }};
