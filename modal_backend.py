@@ -13,7 +13,8 @@ image = modal.Image.debian_slim().pip_install(
     "torch",
     "transformers",
     "sentencepiece",
-    "accelerate"
+    "accelerate",
+    "fastapi[standard]",
 )
 
 # Загружаем твой словарь 81 идентичности
@@ -25,7 +26,7 @@ with open(VOCAB_PATH, "r", encoding="utf-8") as f:
 classifier = None
 
 @app.function(image=image, timeout=600, gpu="any")
-@modal.web_endpoint(method="POST")
+@modal.fastapi_endpoint()
 async def ontology(data: Dict):
     global classifier
     username = data.get("username", "").lstrip("@")
