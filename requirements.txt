@@ -1,0 +1,8 @@
+modal
+torch
+sentence-transformers
+scikit-learn
+numpy
+hdbscan
+fastapi
+uvicorn[standard]
