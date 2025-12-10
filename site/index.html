@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>Квантовая идентичность · Влада Садик</title>
+<title>Квантовая идентичность</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -38,15 +38,16 @@
 <body>
 
 <canvas id="c"></canvas>
-<div class="loading" id="loading">Читаю Instagram @<span id="loaduser"></span>…</div>
+<div class="loading" id="loading"> сбор данных @<span id="loaduser"></span>…</div>
 
 <div class="intro active" id="welcome">
   <div>
     <h1>КВАНТОВАЯ ИДЕНТИЧНОСТЬ</h1>
-    <div class="year">2025—2026 · Влада Садик</div>
-    <p>Твоя личность — это не список ролей.<br>Это живая квантовая пена, где каждая мысль, страх, любовь и творчество — настоящий инстантон.</p>
-    <p>Проект создаёт твой автопортрет в реальном QCD-вакууме<br>на основе открытых данных Instagram.</p>
-    <button onclick="showUsername()">ВОЙТИ В СЕБЯ</button>
+    <div class="year">2.0</div>
+    <p>Что если захватить идентичности в моменте, наблюдая не одно "я", а этот спектр.
+    <br>Это позволяет показать, что "я" не едино, а множественно. 
+    <br>На физическом уровне идентичность является волновой функцией в квантовом пространстве: до внешнего воздействия существует в суперпозиции всех возможных состояний "я", а при наблюдении коллапсирует в одно. </p>
+    <button onclick="showUsername()">НАЧАТЬ</button>
   </div>
 </div>
 
@@ -55,14 +56,14 @@
     <h1>ВВЕДИ СВОЙ INSTAGRAM</h1>
     <p>Только публичный профиль · ничего не сохраняется</p>
     <input type="text" id="user" placeholder="@username" autocomplete="off">
-    <button onclick="enter()">СОЗДАТЬ МОЙ АВТОПОРТРЕТ</button>
+    <button onclick="enter()">СОЗДАТЬ</button>
   </div>
 </div>
 
 <div class="back" id="back">← назад</div>
 <div class="speed" id="speed">скор ×1.00</div>
 <div class="desc" id="desc">загрузка...</div>
-<div class="download-btn" id="downloadBtn">СКАЧАТЬ КВАНТОВЫЙ ПАСПОРТ (TXT)</div>
+<div class="download-btn" id="downloadBtn">скачать спарсенные данные (TXT)</div>
 
 <script>
 // ТВОЙ ТОКЕН + НАДЁЖНЫЙ АКТОР (работает в 2025)
@@ -232,3 +233,4 @@ document.getElementById('user')?.addEventListener('keypress', e=>{if(e.key==='En
 </script>
 </body>
 </html>
+
